@@ -33,7 +33,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className={`${gajrajOne.className} min-h-full flex flex-col`}>
-        {children}
+        <div className="bg-[#004C55] bg-[url('/sinuca.svg')] bg-contain bg-center bg-no-repeat h-screen w-full">
+
+          {children}
+        </div>
       </body>
     </html>
   );

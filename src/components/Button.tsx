@@ -6,6 +6,7 @@ type ButtonProps = {
   textColor: string;
   rounding: string;
   font?: string;
+  
 };
 
 export default function Button({
