@@ -1,12 +1,13 @@
 "use client";
 
-import Button from "@/src/components/Button";
 import { gajrajOne } from "@/src/fonts";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Login() {
-  const [matricula, setMatricula] = useState("");	
+  const router = useRouter();
+  const [matricula, setMatricula] = useState("");
   const [senha, setSenha] = useState("");
 
   const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,10 +19,11 @@ export default function Login() {
   };
 
 
-  const printConsole = () =>{
-    console.log(matricula, senha);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!matricula.trim() || !senha.trim()) return;
+    router.push("/home");
   };
-
 
   return (
       <div className="flex flex-col h-full items-center">
@@ -30,12 +32,17 @@ export default function Login() {
         >
           Sinuquinha
         </h1>
-        <form className="flex flex-col gap-2 mb-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center gap-2 mb-4"
+        >
           <input
             type="number"
             placeholder="Matrícula"
             value={matricula}
             onChange={handleMatriculaChange}
+            required
+            aria-required="true"
             className="
             w-[220px]
             h-[48px]
@@ -55,6 +62,8 @@ export default function Login() {
             placeholder="Senha"
             value={senha}
             onChange={handleSenhaChange}
+            required
+            aria-required="true"
             className="
             w-[220px]
             h-[48px]
@@ -68,14 +77,14 @@ export default function Login() {
             outline-none
           "
           />
+          <button
+            type="submit"
+            className="w-[174px] h-[48px] border border-[#FFD700] rounded-lg text-[#FFD700] text-xl cursor-pointer hover:bg-[#FFD700] hover:text-black transition-all duration-300"
+          >
+            Jogar
+          </button>
         </form>
-        <button
-          className="w-[174px] h-[48px] border border-[#FFD700] rounded-lg text-[#FFD700] text-xl cursor-pointer hover:bg-[#FFD700] hover:text-black transition-all duration-300"
-          onClick={() => printConsole()}
-        >
-          Jogar
-        </button>
-      <h2 className="text-white text-center absolute bottom-[50px]">
+      <h2 className="text-white text-center absolute md:bottom-[50px] bottom-[-18px]">
         <Link href="/cadastrar" className="text-[#FFD700]">
           <span className="underline">Criar conta </span>
         </Link>
