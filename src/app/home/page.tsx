@@ -3,6 +3,7 @@
 import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
 import { gajrajOne } from "@/src/fonts";
+import { Settings } from "lucide-react";
 
 const ranking = [
   { pos: 1, name: "Galdino", score: 150, bg: "bg-[#FFD700]", text: "text-black" },
@@ -14,8 +15,8 @@ const ranking = [
 
 export default function HomePage() {
   return (
-    <div className=" flex h-full min-h-0 flex-col px-4 pb-24 pt-6 w-[340px] relative">
-      <header className="mb-2 flex items-start justify-between">
+    <div className=" flex h-full min-h-0 flex-col px-4 pb-24 pt-3 w-[340px] relative">
+      <header className="mb-2 flex items-center justify-end ">
         <div className="flex gap-2">
           <button
             type="button"
@@ -35,7 +36,7 @@ export default function HomePage() {
           className="text-white/90 transition hover:text-white"
           aria-label="Configurações"
         >
-          <SettingsIcon />
+          <Settings className="w-8 h-8 ml-2" />
         </button>
       </header>
 
@@ -47,7 +48,7 @@ export default function HomePage() {
 
     
 
-      <section className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto mt-14">
+      <section className="flex  flex-col gap-2 overflow-y-auto mt-12">
         <p className="text-center text-xs font-medium tracking-[0.2em] text-white/80">
           <span className="mr-1" aria-hidden>
             🏆
@@ -58,13 +59,13 @@ export default function HomePage() {
           {ranking.map((player) => (
             <li
               key={player.pos}
-              className={`flex items-center justify-between rounded-lg px-3 py-2 ${player.bg} ${player.text}`}
+              className={`flex items-center justify-between rounded-sm px-3 py-0 my-1 mx-3 ${player.bg} ${player.text} justify-between`}
             >
-              <span className={`${gajrajOne.className} text-sm flex items-center gap-2  text-white`}>
-                <span className="w-6 text-center text-sm font-bold text-white">{player.pos}</span>
+                <span className="w-6 text-center text-sm font-bold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill]">{player.pos}</span>
+              <span className={`${gajrajOne.className} text-sm flex items-center gap-2  text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill]`}>
                 {player.name}
               </span>
-              <span className="flex items-center gap-2 text-sm font-semibold text-black">
+              <span className="flex items-center gap-2 text-sm font-semibold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill]">
                 {player.score}
                 <Avatar className="h-7 w-7" />
               </span>
@@ -72,7 +73,8 @@ export default function HomePage() {
           ))}
         </ul>
       </section>
-      <div className="mt-4 flex flex-col items-center gap-3">
+     
+      <div className=" flex flex-col items-center gap-3 mt-8">
         <button
           type="button"
           className="h-12 w-full max-w-[280px] rounded-lg bg-[#FFD700] text-xl text-black transition-opacity hover:opacity-90"
@@ -96,11 +98,3 @@ export default function HomePage() {
   );
 }
 
-function SettingsIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-    </svg>
-  );
-}
