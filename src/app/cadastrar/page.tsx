@@ -1,121 +1,165 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { gajrajOne } from "@/src/fonts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const cadastroSchema = z
+  .object({
+    matricula: z
+      .string()
+      .trim()
+      .min(1, "Matrícula é obrigatória")
+      .regex(/^\d{9}$/, "A matrícula deve conter exatamente 9 dígitos numéricos"),
+    senha: z
+      .string()
+      .min(1, "Senha é obrigatória")
+      .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+      .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
+      .regex(/\d/, "A senha deve conter pelo menos um número")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "A senha deve conter pelo menos um caractere especial",
+      ),
+    confirmarSenha: z.string().min(1, "Confirme a senha"),
+  })
+  .refine((data) => data.senha === data.confirmarSenha, {
+    message: "As senhas devem ser iguais",
+    path: ["confirmarSenha"],
+  });
+
+type CadastroFormData = z.infer<typeof cadastroSchema>;
 
 export default function Cadastrar() {
   const router = useRouter();
-  const [matricula, setMatricula] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CadastroFormData>({
+    resolver: zodResolver(cadastroSchema),
+    defaultValues: {
+      matricula: "",
+      senha: "",
+      confirmarSenha: "",
+    },
+  });
 
-  const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMatricula(e.target.value);
-  };
-
-  const handleSenhaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSenha(e.target.value);
-  };
-
-  const handleConfirmarSenhaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfirmarSenha(e.target.value);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!matricula.trim() || !senha.trim() || !confirmarSenha.trim()) return;
-    if (senha !== confirmarSenha) return;
+  const onSubmit = () => {
     router.push("/home");
   };
 
   return (
-      <div className="flex flex-col h-full items-center">
+    <div className="flex min-h-full flex-1 flex-col px-6 pb-8 pt-10 sm:px-10 sm:pt-14">
+      <div className="flex flex-1 flex-col items-center justify-center">
         <h1
-          className={`${gajrajOne.className} text-[36px] mt-36 mb-8 text-[#FFD700]`}
+          className={`${gajrajOne.className} mb-8 text-center text-[clamp(2rem,8vw,2.3rem)] text-[#FFD700]`}
         >
           Sinuquinha
         </h1>
         <form
-          onSubmit={handleSubmit}
-          className="flex flex-col items-center gap-2 mb-4"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="flex w-full max-w-[280px] flex-col items-center gap-3"
         >
-          <input
-            type="number"
-            placeholder="Matrícula"
-            value={matricula}
-            onChange={handleMatriculaChange}
-            required
-            aria-required="true"
-            className="
-            w-[220px]
-            h-[48px]
-            px-4
-            rounded-lg
-            border
-            border-white/30
-            bg-white/10
-            text-white
-            placeholder:text-white/60
-            outline-none
-            [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
-
-          "
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={senha}
-            onChange={handleSenhaChange}
-            required
-            aria-required="true"
-            className="
-            w-[220px]
-            h-[48px]
-            px-4
-            rounded-lg
-            border
-            border-white/30
-            bg-white/10
-            text-white
-            placeholder:text-white/60
-            outline-none
-          "
-          />
-          <input
-            type="password"
-            placeholder="Repetir Senha"
-            value={confirmarSenha}
-            onChange={handleConfirmarSenhaChange}
-            required
-            aria-required="true"
-            className="
-            w-[220px]
-            h-[48px]
-            px-4
-            rounded-lg
-            border
-            border-white/30
-            bg-white/10
-            text-white
-            placeholder:text-white/60
-            outline-none
-          "
-          />
+          <div className="flex w-full flex-col gap-1">
+            <input
+              type="text"
+              placeholder="Matrícula"
+              inputMode="numeric"
+              maxLength={9}
+              aria-required="true"
+              aria-invalid={Boolean(errors.matricula)}
+              {...register("matricula")}
+              className="
+              h-12
+              w-full
+              rounded-lg
+              border
+              border-white/30
+              bg-white/10
+              px-4
+              text-white
+              placeholder:text-white/60
+              outline-none
+              [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
+            "
+            />
+            {errors.matricula && (
+              <p className="w-full text-left text-sm text-red-300">
+                {errors.matricula.message}
+              </p>
+            )}
+          </div>
+          <div className="flex w-full flex-col gap-1">
+            <input
+              type="password"
+              placeholder="Senha"
+              aria-required="true"
+              aria-invalid={Boolean(errors.senha)}
+              {...register("senha")}
+              className="
+              h-12
+              w-full
+              rounded-lg
+              border
+              border-white/30
+              bg-white/10
+              px-4
+              text-white
+              placeholder:text-white/60
+              outline-none
+            "
+            />
+            {errors.senha && (
+              <p className="w-full text-left text-sm text-red-300">
+                {errors.senha.message}
+              </p>
+            )}
+          </div>
+          <div className="flex w-full flex-col gap-1">
+            <input
+              type="password"
+              placeholder="Repetir Senha"
+              aria-required="true"
+              aria-invalid={Boolean(errors.confirmarSenha)}
+              {...register("confirmarSenha")}
+              className="
+              h-12
+              w-full
+              rounded-lg
+              border
+              border-white/30
+              bg-white/10
+              px-4
+              text-white
+              placeholder:text-white/60
+              outline-none
+            "
+            />
+            {errors.confirmarSenha && (
+              <p className="w-full text-left text-sm text-red-300">
+                {errors.confirmarSenha.message}
+              </p>
+            )}
+          </div>
           <button
             type="submit"
-            className="w-[174px] h-[48px] border border-[#FFD700] rounded-lg text-[#FFD700] text-xl cursor-pointer hover:bg-[#FFD700] hover:text-black transition-all duration-300"
+            className="mt-2 h-12 w-full max-w-[220px] cursor-pointer rounded-lg border border-[#FFD700] text-xl text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-black"
           >
             Cadastrar
           </button>
         </form>
-        
-        <h2 className="text-white text-center absolute md:bottom-[50px] bottom-[-18px]">
+      </div>
+
+      <h2 className="mt-6 pb-2 text-center text-white">
         <Link href="/login" className="text-[#FFD700]">
           <span className="underline">login </span>
         </Link>
       </h2>
-      </div>
+    </div>
   );
 }

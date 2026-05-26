@@ -9,25 +9,35 @@ const iconClass = (active: boolean) =>
 
 export default function BottomNav({ active = "home" }: BottomNavProps) {
   return (
-    <nav className="absolute inset-x-0 bottom-0 z-10 flex md:w-[320px] w-full mx-auto justify-around border  bg-[#004C55]/95 py-3 backdrop-blur-sm box-border border-[#FFEDAD] rounded-b-[20px]">
+    <nav className="mt-auto 
+    -mx-4 sm:-mx-5
+    -mb-4 
+    flex 
+    w-[calc(100%+2rem)] sm:w-[calc(100%+2.5rem)] 
+    items-center 
+    justify-around 
+    border-t border-[#FFEDAD] bg-[#004C55]/95 px-4 sm:px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm
+     "
+    >
       <Link
         href="/home"
-        className={iconClass(active === "home")}
+        className={`flex flex-1 justify-center ${iconClass(active === "home")}`}
         aria-label="Início"
         aria-current={active === "home" ? "page" : undefined}
       >
         <HomeIcon />
       </Link>
-      <button
-        type="button"
-        className={iconClass(active === "trophy")}
-        aria-label="Troféus"
+      <Link
+        href="/jogar"
+        className={`flex flex-1 justify-center ${iconClass(active === "trophy")}`}
+        aria-label="Jogar"
+        aria-current={active === "trophy" ? "page" : undefined}
       >
         <TrophyIcon />
-      </button>
+      </Link>
       <button
         type="button"
-        className={iconClass(active === "profile")}
+        className={`flex flex-1 justify-center ${iconClass(active === "profile")}`}
         aria-label="Perfil"
       >
         <ProfileIcon />
