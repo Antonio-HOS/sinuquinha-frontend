@@ -42,7 +42,7 @@ export default function AppHeader({
         <button
           type="button"
           onClick={() => setIsConfigOpen(true)}
-          className="shrink-0 text-white/90 transition hover:text-white"
+          className="shrink-0 text-white/90 transition hover:text-white cursor-pointer active:scale-95"
           aria-label="Configurações"
         >
           <Settings className={settingsIconClassName} />
