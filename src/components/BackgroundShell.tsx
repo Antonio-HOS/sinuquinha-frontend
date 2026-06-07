@@ -11,10 +11,16 @@ type BackgroundShellProps = {
 
 export default function BackgroundShell({ children }: BackgroundShellProps) {
   const pathname = usePathname();
-  const isAuthScreen = AUTH_PATHS.includes(pathname);
-  const backgroundImage = isAuthScreen
-    ? "url('/sinuca.svg')"
-    : "url('/home.svg')";
+  
+  const getBackgroundImage = (path: string) => {
+    if (AUTH_PATHS.includes(path)) return "url('/sinuca.svg')";
+    if (path === "/profile") return "url('/BgProfile.svg')";
+    
+    return "url('/home.svg')"; 
+  };
+
+  const backgroundImage = getBackgroundImage(pathname);
+
   const shellStyle = {
     "--shell-mobile-min-height": "max(100svh, calc(100vw * 874 / 402))",
     "--shell-desktop-width": "calc(100svh * 402 / 874)",

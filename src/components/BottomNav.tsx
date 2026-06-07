@@ -35,13 +35,14 @@ export default function BottomNav({ active = "home" }: BottomNavProps) {
       >
         <TrophyIcon />
       </Link>
-      <button
-        type="button"
+      <Link
+        href="/profile"
         className={`flex flex-1 justify-center ${iconClass(active === "profile")}`}
         aria-label="Perfil"
+        aria-current={active === "profile" ? "page" : undefined}
       >
         <ProfileIcon />
-      </button>
+      </Link>
     </nav>
   );
 }
