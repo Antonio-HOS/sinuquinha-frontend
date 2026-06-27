@@ -46,7 +46,7 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Divisor */}
+      {/* Divisor
       <div className="flex items-center justify-center w-full my-6 opacity-60">
         <div className="h-px bg-white/30 flex-1 max-w-[120px]"></div>
         <div className="mx-3 w-4 h-4 bg-white rounded-full relative flex items-center justify-center">
@@ -56,7 +56,7 @@ export default function ProfilePage() {
           <span className="absolute top-1/2 -right-3 -translate-y-1/2 text-[8px] text-white">▶</span>
         </div>
         <div className="h-px bg-white/30 flex-1 max-w-[120px]"></div>
-      </div>
+      </div> */}
 
       {/* Estatísticas Principais */}
       <div className="flex justify-between items-center w-full px-2 mb-8">
@@ -82,7 +82,7 @@ export default function ProfilePage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`${gajrajOne.className} ${activeTab === tab ? "text-[#FFD700]" : "text-white"} text-sm sm:text-base pb-2 flex-1 text-center relative capitalize`}
+            className={`${gajrajOne.className} ${activeTab === tab ? "text-[#FFD700]" : "text-white"} flex-1 pb-2 text-center text-[13px] capitalize sm:text-sm relative`}
           >
             {tab}
             {activeTab === tab && (
