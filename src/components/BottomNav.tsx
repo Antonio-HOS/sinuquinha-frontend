@@ -28,9 +28,9 @@ export default function BottomNav({ active = "home" }: BottomNavProps) {
         <HomeIcon />
       </Link>
       <Link
-        href="/jogar"
+        href="/ranking"
         className={`flex flex-1 justify-center ${iconClass(active === "trophy")}`}
-        aria-label="Jogar"
+        aria-label="Ranking"
         aria-current={active === "trophy" ? "page" : undefined}
       >
         <TrophyIcon />

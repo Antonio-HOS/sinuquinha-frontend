@@ -2,6 +2,7 @@
 
 import Avatar from "@/src/components/Avatar";
 import { Settings } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import ConfigDrawer from "./ConfigDrawer";
 
@@ -24,14 +25,14 @@ export default function AppHeader({
         className={`flex items-center justify-end gap-3 border-b border-[#FFEDAD] pb-2 -mx-4 mb-3 px-4 sm:-mx-5 sm:px-5 ${className}`.trim()}
       >
         <div className="flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
+          <Link
+            href="/moedas"
             className="flex items-center gap-2 rounded-full bg-[#FFD700] px-2.5 py-1.5 text-black sm:px-3"
-            aria-label="Adicionar amigo"
+            aria-label="Comprar FABCOINS"
           >
             <span className="text-lg font-bold leading-none">+</span>
             <Avatar className="h-6 w-6 sm:h-7 sm:w-7" />
-          </button>
+          </Link>
 
           <div className="flex items-center gap-2 rounded-full bg-black/40 px-2.5 py-1.5 text-white sm:px-3">
             <span className="font-semibold">{score}</span>

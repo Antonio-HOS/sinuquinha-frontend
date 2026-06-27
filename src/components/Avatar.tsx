@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type AvatarProps = {
   className?: string;
 };
@@ -5,13 +7,15 @@ type AvatarProps = {
 export default function Avatar({ className = "h-8 w-8" }: AvatarProps) {
   return (
     <span
-      className={`inline-flex shrink-0 overflow-hidden rounded-full ${className}`}
+      className={`relative inline-flex shrink-0 overflow-hidden rounded-full ${className}`}
       aria-hidden
     >
-      <img
+      <Image
         src="/rucoin.svg"
         alt=""
-        className="size-full object-cover"
+        fill
+        sizes="48px"
+        className="object-cover"
       />
     </span>
   );

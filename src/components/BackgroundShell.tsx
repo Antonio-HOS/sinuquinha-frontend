@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 
-const AUTH_PATHS = ["/", "/login", "/cadastrar"];
+const HOME_BACKGROUND_PATHS = ["/", "/login", "/cadastrar", "/home", "/jogar"];
 
 type BackgroundShellProps = {
   children: React.ReactNode;
@@ -11,15 +11,9 @@ type BackgroundShellProps = {
 
 export default function BackgroundShell({ children }: BackgroundShellProps) {
   const pathname = usePathname();
-  
-  const getBackgroundImage = (path: string) => {
-    if (AUTH_PATHS.includes(path)) return "url('/sinuca.svg')";
-    if (path === "/profile") return "url('/BgProfile.svg')";
-    
-    return "url('/home.svg')"; 
-  };
-
-  const backgroundImage = getBackgroundImage(pathname);
+  const backgroundImage = HOME_BACKGROUND_PATHS.includes(pathname)
+    ? "url('/HOME.svg')"
+    : "url('/BgProfile.svg')";
 
   const shellStyle = {
     "--shell-mobile-min-height": "max(100svh, calc(100vw * 874 / 402))",
