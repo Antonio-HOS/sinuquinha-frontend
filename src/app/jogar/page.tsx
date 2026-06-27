@@ -1,6 +1,7 @@
 import AppHeader from "@/src/components/AppHeader";
 import BottomNav from "@/src/components/BottomNav";
 import { gajrajOne } from "@/src/fonts";
+import Link from "next/link";
 
 const modosDeJogo = ["1x1", "2x2", "3x3"] as const;
 
@@ -26,13 +27,13 @@ export default function JogarPage() {
 
         <div className="mt-10 flex w-full max-w-[280px] flex-col items-center gap-5 sm:gap-6">
           {modosDeJogo.map((modo) => (
-            <button
+            <Link
               key={modo}
-              type="button"
-              className={`${gajrajOne.className} h-14 w-full rounded-xl border border-[#FFD700] bg-[#0B6670]/30 px-4 text-[22px] text-[#FFD700] shadow-[0_0_0_1px_rgba(255,215,0,0.05)] transition-all duration-300 hover:bg-[#FFD700] hover:text-black`}
+              href="/jogar/selecionar"
+              className={`${gajrajOne.className} flex h-14 w-full items-center justify-center rounded-xl border border-[#FFD700] bg-[#0B6670]/30 px-4 text-[22px] text-[#FFD700] shadow-[0_0_0_1px_rgba(255,215,0,0.05)] transition-all duration-300 hover:bg-[#FFD700] hover:text-black`}
             >
               {modo}
-            </button>
+            </Link>
           ))}
         </div>
       </section>
