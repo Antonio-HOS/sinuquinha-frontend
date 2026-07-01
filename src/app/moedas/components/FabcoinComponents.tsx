@@ -1,20 +1,16 @@
 import Avatar from "@/src/components/Avatar";
 import { getButtonClassName } from "@/src/components/Button";
 import { gajrajOne } from "@/src/fonts";
+import { formatPrice } from "@/src/lib/api";
 import Link from "next/link";
 
 export type CoinPackage = {
+  id: string;
   coins: number;
-  price: string;
-  bonus?: string;
+  bonus_coins: number;
+  price_cents: number;
+  currency: string;
 };
-
-export const coinPackages: CoinPackage[] = [
-  { coins: 100, price: "R$ 2,90" },
-  { coins: 250, price: "R$ 5,90", bonus: "+25 bônus" },
-  { coins: 500, price: "R$ 9,90", bonus: "+75 bônus" },
-  { coins: 1000, price: "R$ 17,90", bonus: "+200 bônus" },
-];
 
 type FabcoinModalProps = {
   title: string;
@@ -47,7 +43,7 @@ type CoinPackageCardProps = {
 export function CoinPackageCard({ pack }: CoinPackageCardProps) {
   return (
     <Link
-      href="/moedas/comprar"
+      href={`/moedas/comprar?packageId=${pack.id}`}
       className="flex items-center justify-between rounded-lg border border-white/20 bg-white/10 px-3 py-3 transition-colors hover:border-[#FFD700] hover:bg-[#FFD700]/10"
     >
       <div className="flex items-center gap-3">
@@ -56,13 +52,13 @@ export function CoinPackageCard({ pack }: CoinPackageCardProps) {
           <p className={`${gajrajOne.className} text-xl leading-none text-[#FFD700]`}>
             {pack.coins}
           </p>
-          {pack.bonus ? (
-            <p className="text-xs text-[#2AC054]">{pack.bonus}</p>
+          {pack.bonus_coins ? (
+            <p className="text-xs text-[#2AC054]">+{pack.bonus_coins} bônus</p>
           ) : null}
         </div>
       </div>
       <span className={`${gajrajOne.className} text-sm text-[#FFEDAD]`}>
-        {pack.price}
+        {formatPrice(pack.price_cents, pack.currency)}
       </span>
     </Link>
   );
