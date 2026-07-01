@@ -1,5 +1,9 @@
+"use client";
+
 import { ArrowLeft, LogOut } from "lucide-react";
 import { gajrajOne } from "@/src/fonts";
+import { clearAccessToken } from "@/src/lib/api";
+import { useRouter } from "next/navigation";
 
 type ConfigDrawerProps = {
   isOpen: boolean;
@@ -7,6 +11,14 @@ type ConfigDrawerProps = {
 };
 
 export default function ConfigDrawer({ isOpen, onClose }: ConfigDrawerProps) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearAccessToken();
+    onClose();
+    router.replace("/login");
+  };
+
   return (
     <>
       <div
@@ -38,6 +50,8 @@ export default function ConfigDrawer({ isOpen, onClose }: ConfigDrawerProps) {
           </button>
 
           <button 
+            type="button"
+            onClick={handleLogout}
             className={`${gajrajOne.className} text-[#FF0000] text-lg flex items-center gap-2 hover:text-red-400 transition-colors w-fit`}
           >
             <LogOut className="w-5 h-5 rotate-180" />

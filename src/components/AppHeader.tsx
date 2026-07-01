@@ -1,6 +1,7 @@
 "use client";
 
 import Avatar from "@/src/components/Avatar";
+import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -18,6 +19,8 @@ export default function AppHeader({
   settingsIconClassName = "h-7 w-7 sm:h-8 sm:w-8",
 }: AppHeaderProps) {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const { user } = useCurrentUser();
+  const visibleScore = user?.coin_balance ?? score;
 
   return (
     <>
@@ -28,14 +31,14 @@ export default function AppHeader({
           <Link
             href="/moedas"
             className="flex items-center gap-2 rounded-full bg-[#FFD700] px-2.5 py-1.5 text-black sm:px-3"
-            aria-label="Comprar FABCOINS"
+            aria-label="Coletar FABCOINS"
           >
             <span className="text-lg font-bold leading-none">+</span>
             <Avatar className="h-6 w-6 sm:h-7 sm:w-7" />
           </Link>
 
           <div className="flex items-center gap-2 rounded-full bg-black/40 px-2.5 py-1.5 text-white sm:px-3">
-            <span className="font-semibold">{score}</span>
+            <span className="font-semibold">{visibleScore}</span>
             <Avatar className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
         </div>
