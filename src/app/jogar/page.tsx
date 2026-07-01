@@ -3,7 +3,7 @@ import BottomNav from "@/src/components/BottomNav";
 import { gajrajOne } from "@/src/fonts";
 import Link from "next/link";
 
-const modosDeJogo = ["1x1", "2x2", "3x3"] as const;
+const modosDeJogo = ["1x1", "2x2", "Todos Contra (3)"] as const;
 
 export default function JogarPage() {
   return (
@@ -29,7 +29,7 @@ export default function JogarPage() {
           {modosDeJogo.map((modo) => (
             <Link
               key={modo}
-              href="/jogar/selecionar"
+              href={`/jogar/selecionar?mode=${modo}`}
               className={`${gajrajOne.className} flex h-14 w-full items-center justify-center rounded-xl border border-[#FFD700] bg-[#0B6670]/30 px-4 text-[22px] text-[#FFD700] shadow-[0_0_0_1px_rgba(255,215,0,0.05)] transition-all duration-300 hover:bg-[#FFD700] hover:text-black`}
             >
               {modo}

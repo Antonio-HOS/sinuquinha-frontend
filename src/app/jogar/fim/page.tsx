@@ -1,26 +1,59 @@
+"use client";
+
 import {
-  MatchDivider,
   ResultActions,
   RewardBadge,
 } from "@/src/app/jogar/components/MatchFlow";
 import AppHeader from "@/src/components/AppHeader";
 import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
+import { useCurrentUser } from "@/src/hooks/useCurrentUser";
+import { api, formatMatchDuration, type Match, type User } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
-const matchResult = {
-  winner: "Vencedor",
-  subtitle: "Farmou Aura",
-  playerName: "codigo",
-  reward: 750,
-  duration: "1h:20min",
-  score: 150,
-};
+function MatchEndContent() {
+  const searchParams = useSearchParams();
+  const matchId = searchParams.get("matchId");
+  const { user } = useCurrentUser({ redirectToLogin: true });
+  const [match, setMatch] = useState<Match | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
 
-export default function MatchEndPage() {
+  useEffect(() => {
+    async function loadResult() {
+      if (!matchId) return;
+      const [matchResponse, usersResponse] = await Promise.all([
+        api.match(matchId),
+        api.users(),
+      ]);
+      setMatch(matchResponse);
+      setUsers(usersResponse);
+    }
+
+    void loadResult();
+  }, [matchId]);
+
+  const userById = useMemo(
+    () => new Map(users.map((item) => [item.id, item])),
+    [users],
+  );
+  const winnerPlayers =
+    match?.players?.filter((player) => player.result === "winner") ?? [];
+  const winnerNames = winnerPlayers
+    .map((player) => userById.get(player.user_id)?.nickname ?? player.user_id.slice(0, 8))
+    .join(" + ");
+  const isCurrentUserWinner = Boolean(
+    user?.id && winnerPlayers.some((player) => player.user_id === user.id),
+  );
+  const totalReward = (match?.stake_coins ?? 0) * (match?.players?.length ?? 0);
+  const reward = winnerPlayers.length
+    ? Math.floor(totalReward / winnerPlayers.length)
+    : totalReward;
+
   return (
     <div className="flex min-h-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-5">
-      <AppHeader score={matchResult.score} />
+      <AppHeader />
 
       <main className="relative flex min-h-0 flex-1 flex-col items-center text-center">
         <div className="scrollbar-hidden mx-auto flex min-h-0 w-full max-w-[344px] flex-1 flex-col items-center overflow-y-scroll px-2">
@@ -30,16 +63,16 @@ export default function MatchEndPage() {
               <h1
                 className={`${gajrajOne.className} text-center text-[clamp(2rem,9vw,2.5rem)] leading-none tracking-[0.07em] text-[#2AC054]`}
               >
-                {matchResult.winner}
+                {isCurrentUserWinner ? "Vencedor" : "Fim de Jogo"}
               </h1>
               <p className="mt-2 text-center text-sm tracking-[0.12em] text-[#2AC054]">
-                {matchResult.subtitle}
+                {isCurrentUserWinner ? "Você venceu a partida" : "Resultado registrado"}
               </p>
             </div>
           </section>
 
           <section className="mt-4 flex w-full justify-center rounded-xl border border-[#FFD700]/30 bg-black/15 p-4">
-            <RewardBadge value={matchResult.reward} />
+            <RewardBadge value={reward} />
           </section>
 
           <section className="mt-4 flex w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-3">
@@ -47,12 +80,12 @@ export default function MatchEndPage() {
               <Avatar className="size-14 border-2 border-[#FFEDAD]/70" />
               <div className="text-center">
                 <p className="text-xs uppercase tracking-[0.16em] text-[#FFEDAD]/70">
-                  Jogador
+                  {winnerPlayers.length > 1 ? "Vencedores" : "Jogador"}
                 </p>
                 <span
                   className={`${gajrajOne.className} text-xl leading-none tracking-[0.08em] text-[#FFD700]`}
                 >
-                  {matchResult.playerName}
+                  {winnerNames || "Aguardando resultado"}
                 </span>
               </div>
             </div>
@@ -67,7 +100,7 @@ export default function MatchEndPage() {
                 Tempo da Partida
               </span>
               <span className={`${gajrajOne.className} text-lg text-white`}>
-                {matchResult.duration}
+                {formatMatchDuration(match)}
               </span>
             </div>
           </section>
@@ -85,5 +118,13 @@ export default function MatchEndPage() {
 
       <BottomNav active="trophy" />
     </div>
+  );
+}
+
+export default function MatchEndPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center text-white">Carregando...</div>}>
+      <MatchEndContent />
+    </Suspense>
   );
 }
