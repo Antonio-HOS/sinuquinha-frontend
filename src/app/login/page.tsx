@@ -1,34 +1,25 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api, setAccessToken } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const loginSchema = z.object({
-  matricula: z
-    .string()
-    .trim()
-    .min(1, "Matrícula é obrigatória")
-    .regex(/^\d{9}$/, "A matrícula deve conter exatamente 9 dígitos numéricos"),
-  senha: z
-    .string()
-    .min(1, "Senha é obrigatória")
-    .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
-    .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
-    .regex(/\d/, "A senha deve conter pelo menos um número")
-    .regex(
-      /[^A-Za-z0-9]/,
-      "A senha deve conter pelo menos um caractere especial",
-    ),
+  email: z.string().trim().email("E-mail inválido"),
+  senha: z.string().min(1, "Senha é obrigatória"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const router = useRouter();
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -36,13 +27,28 @@ export default function Login() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      matricula: "",
+      email: "",
       senha: "",
     },
   });
 
-  const onSubmit = () => {
-    router.push("/home");
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      setIsSubmitting(true);
+      setFormError("");
+      const response = await api.login({
+        email: data.email,
+        password: data.senha,
+      });
+      setAccessToken(response.accessToken);
+      router.push("/home");
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : "Não foi possível entrar.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,19 +60,18 @@ export default function Login() {
           Sinuquinha
         </h1>
         <form
+          method="post"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
           className="flex w-full max-w-[280px] flex-col items-center gap-3"
         >
           <div className="flex w-full flex-col gap-1">
             <input
-              type="text"
-              placeholder="Matrícula"
-              inputMode="numeric"
-              maxLength={9}
+              type="email"
+              placeholder="E-mail"
               aria-required="true"
-              aria-invalid={Boolean(errors.matricula)}
-              {...register("matricula")}
+              aria-invalid={Boolean(errors.email)}
+              {...register("email")}
               className="
               h-12
               w-full
@@ -81,9 +86,9 @@ export default function Login() {
               [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
             "
             />
-            {errors.matricula && (
+            {errors.email && (
               <p className="w-full text-left text-sm text-red-300">
-                {errors.matricula.message}
+                {errors.email.message}
               </p>
             )}
           </div>
@@ -115,10 +120,16 @@ export default function Login() {
           </div>
           <button
             type="submit"
+            disabled={isSubmitting}
             className="mt-2 h-12 w-full max-w-[220px] cursor-pointer rounded-lg border border-[#FFD700] text-xl text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-black"
           >
-            Jogar
+            {isSubmitting ? "Entrando..." : "Jogar"}
           </button>
+          {formError ? (
+            <p className="w-full text-center text-sm text-red-300">
+              {formError}
+            </p>
+          ) : null}
         </form>
       </div>
       <h2 className="mt-6 pb-2 text-center text-white">
