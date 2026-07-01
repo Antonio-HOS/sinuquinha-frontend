@@ -1,39 +1,27 @@
+"use client";
+
 import { useState } from "react";
 import { gajrajOne } from "@/src/fonts";
-import { suggestionsMock, friendsMock } from "../mocks";
+import type { User } from "@/src/lib/api";
+import Link from "next/link";
 
-export default function FriendsTab() {
+type FriendsTabProps = {
+  users: User[];
+  currentUserId?: string;
+};
+
+export default function FriendsTab({ users, currentUserId }: FriendsTabProps) {
   const [search, setSearch] = useState("");
-  const [seguindo, setSeguindo] = useState<string[]>([]);
-  const [desafiados, setDesafiados] = useState<string[]>([]);
 
-  // Filtra as listas com base no que foi digitado (nome ou matrícula)
-  const filteredSuggestions = suggestionsMock.filter(
-    (s) =>
-      s.nome.toLowerCase().includes(search.toLowerCase()) ||
-      s.id.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const filteredFriends = friendsMock.filter(
-    (f) =>
-      f.nome.toLowerCase().includes(search.toLowerCase()) ||
-      f.id.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // Ações dos botões
-  const handleSeguir = (id: string) => {
-    setSeguindo((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+  const filteredUsers = users.filter((user) => {
+    const query = search.toLowerCase();
+    return (
+      user.id !== currentUserId &&
+      (user.name.toLowerCase().includes(query) ||
+        user.nickname.toLowerCase().includes(query) ||
+        user.registration_number?.toLowerCase().includes(query))
     );
-  };
-
-  const handleDesafiar = (id: string) => {
-    setDesafiados((prev) => [...prev, id]);
-    // Simula um tempo de "Enviando desafio..."
-    setTimeout(() => {
-      setDesafiados((prev) => prev.filter((item) => item !== id));
-    }, 2000);
-  };
+  });
 
   return (
     <div className="scrollbar-hidden flex flex-col gap-6 overflow-y-auto pb-24 px-1 mt-2">
@@ -64,99 +52,39 @@ export default function FriendsTab() {
         </div>
       </div>
 
-      {/* Sugestões */}
-      {filteredSuggestions.length > 0 && (
+      {filteredUsers.length > 0 && (
         <div className="flex flex-col gap-3">
           <h2 className={`${gajrajOne.className} text-[#FFD700] text-sm uppercase tracking-wide`}>
-            Sugestões
+            Jogadores
           </h2>
-          {filteredSuggestions.map((item) => {
-            const isFollowing = seguindo.includes(item.id);
-            return (
+          {filteredUsers.map((item) => (
               <div
                 key={item.id}
                 className="border border-white/60 rounded-xl p-4 flex justify-between items-center bg-transparent"
               >
                 <div className="flex flex-col">
                   <span className={`${gajrajOne.className} text-white text-sm sm:text-base`}>
-                    {item.nome}
+                    {item.nickname}
                   </span>
                   <span className={`${gajrajOne.className} text-white/40 text-[10px] mt-0.5`}>
-                    {item.id}
+                    {item.registration_number ?? item.email}
                   </span>
                   <span className={`${gajrajOne.className} text-white text-[10px] mt-2 underline decoration-white/40 underline-offset-4`}>
-                    Rank: {item.rank}
+                    Rank: {item.rank_points}
                   </span>
                 </div>
-                <button
-                  onClick={() => handleSeguir(item.id)}
-                  className={`${gajrajOne.className} text-xs px-4 py-1.5 rounded-lg border-2 transition-all ${
-                    isFollowing
-                      ? "border-transparent bg-white/20 text-white"
-                      : "border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700]/10"
-                  }`}
+                <Link
+                  href={`/jogar/moedas?opponentId=${item.id}&opponent=${encodeURIComponent(item.nickname)}`}
+                  className={`${gajrajOne.className} text-xs px-4 py-2 rounded-lg text-black bg-[#FFD700] hover:bg-yellow-400 transition-all`}
                 >
-                  {isFollowing ? "Seguindo" : "Seguir"}
-                </button>
+                  Desafiar
+                </Link>
               </div>
-            );
-          })}
+          ))}
         </div>
       )}
 
-      {/* Meus Amigos */}
-      {filteredFriends.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <h2 className={`${gajrajOne.className} text-[#FFD700] text-sm uppercase tracking-wide`}>
-            Meus Amigos
-          </h2>
-          {filteredFriends.map((item) => {
-            const isChallenged = desafiados.includes(item.id);
-            return (
-              <div
-                key={item.id}
-                className="border border-white/60 rounded-xl p-4 flex justify-between items-center bg-transparent"
-              >
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className={`${gajrajOne.className} text-white text-sm sm:text-base uppercase`}>
-                      {item.nome}
-                    </span>
-                    {/* Indicador de Status */}
-                    {item.status === "online" ? (
-                      <span className={`${gajrajOne.className} flex items-center gap-1 text-[8px] text-white uppercase`}>
-                        <span className="w-2 h-2 rounded-full bg-[#10B981]"></span> Online
-                      </span>
-                    ) : (
-                      <span className={`${gajrajOne.className} flex items-center gap-1 text-[8px] text-white uppercase`}>
-                        <span className="w-2 h-2 rounded-full bg-[#EF4444]"></span> Offline
-                      </span>
-                    )}
-                  </div>
-                  <span className={`${gajrajOne.className} text-white/40 text-[10px] mt-0.5`}>
-                    {item.id}
-                  </span>
-                  <span className={`${gajrajOne.className} text-white text-[10px] mt-2 underline decoration-white/40 underline-offset-4`}>
-                    Rank: {item.rank}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleDesafiar(item.id)}
-                  disabled={isChallenged}
-                  className={`${gajrajOne.className} text-xs px-4 py-2 rounded-lg text-black transition-all ${
-                    isChallenged ? "bg-yellow-600" : "bg-[#FFD700] hover:bg-yellow-400"
-                  }`}
-                >
-                  {isChallenged ? "Aguardando..." : "Desafiar"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Mensagem quando a busca não encontra ninguém */}
-      {filteredSuggestions.length === 0 && filteredFriends.length === 0 && (
+      {filteredUsers.length === 0 && (
         <div className="text-center text-white/60 text-sm mt-8">
           Nenhum jogador encontrado.
         </div>

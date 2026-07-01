@@ -3,9 +3,10 @@
 import AppHeader from "@/src/components/AppHeader";
 import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
+import { useCurrentUser } from "@/src/hooks/useCurrentUser";
+import { api, type Match, type User, type UserStats } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
-import { useState } from "react";
-import { userMock } from "./mocks";
+import { useEffect, useState } from "react";
 import HistoryTab from "./components/HistoryTab";
 import StatsTab from "./components/StatsTab";
 import FriendsTab from "./components/FriendsTab";
@@ -13,23 +14,54 @@ import FriendsTab from "./components/FriendsTab";
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("historico");
   const [copiado, setCopiado] = useState(false);
+  const { user, isLoading } = useCurrentUser({ redirectToLogin: true });
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    async function loadProfileData() {
+      const [statsResponse, matchesResponse, usersResponse] = await Promise.allSettled([
+        api.statsMe(),
+        api.matches(),
+        api.users(),
+      ]);
+
+      setStats(statsResponse.status === "fulfilled" ? statsResponse.value : null);
+      setMatches(matchesResponse.status === "fulfilled" ? matchesResponse.value : []);
+      setUsers(usersResponse.status === "fulfilled" ? usersResponse.value : []);
+    }
+
+    if (user) {
+      void loadProfileData();
+    }
+  }, [user]);
 
   const handleCopiarId = () => {
-    navigator.clipboard.writeText(userMock.id);
+    if (!user) return;
+    navigator.clipboard.writeText(user.id);
     setCopiado(true);
     setTimeout(() => {
       setCopiado(false);
     }, 2000);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-full flex-1 items-center justify-center text-white">
+        Carregando perfil...
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-5">
+    <div className="relative flex min-h-full flex-1 flex-col overflow-hidden px-4 pb-4 pt-3 sm:px-5">
       <AppHeader />
 
       {/* Info do Jogador */}
       <div className="mt-6 flex flex-col">
         <h1 className={`${gajrajOne.className} text-[clamp(2rem,8vw,2rem)] text-white uppercase tracking-wider leading-none`}>
-          {userMock.nome}
+          {user?.nickname ?? "Jogador"}
         </h1>
         <button
           onClick={handleCopiarId}
@@ -40,7 +72,7 @@ export default function ProfilePage() {
             <>Copiado! ✅</>
           ) : (
             <>
-              {userMock.id} <span className="text-xs">📋</span>
+              {user?.id} <span className="text-xs">📋</span>
             </>
           )}
         </button>
@@ -61,7 +93,7 @@ export default function ProfilePage() {
       {/* Estatísticas Principais */}
       <div className="flex justify-between items-center w-full px-2 mb-8">
         <div className="flex flex-col items-center w-24">
-          <span className={`${gajrajOne.className} text-2xl text-white`}>{userMock.vitorias}</span>
+          <span className={`${gajrajOne.className} text-2xl text-white`}>{stats?.wins ?? 0}</span>
           <span className={`${gajrajOne.className} text-white text-[10px] sm:text-xs uppercase mt-1`}>Vitorias</span>
         </div>
 
@@ -71,7 +103,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-col items-center w-24">
-          <span className={`${gajrajOne.className} text-2xl text-white`}>{userMock.rank}</span>
+          <span className={`${gajrajOne.className} text-2xl text-white`}>{user?.rank_points ?? 0}</span>
           <span className={`${gajrajOne.className} text-white text-[10px] sm:text-xs uppercase mt-1`}>RANK</span>
         </div>
       </div>
@@ -94,9 +126,11 @@ export default function ProfilePage() {
 
       {/* Conteúdo da Aba Ativa */}
       <div className="flex-1 flex flex-col min-h-0">
-        {activeTab === "historico" && <HistoryTab />}
-        {activeTab === "estatisticas" && <StatsTab />}
-        {activeTab === "amigos" && <FriendsTab />}
+        {activeTab === "historico" && (
+          <HistoryTab matches={matches} users={users} currentUserId={user?.id} />
+        )}
+        {activeTab === "estatisticas" && <StatsTab stats={stats} user={user} />}
+        {activeTab === "amigos" && <FriendsTab users={users} currentUserId={user?.id} />}
       </div>
 
       <BottomNav active="profile" />
