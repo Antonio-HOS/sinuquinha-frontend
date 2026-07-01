@@ -3,19 +3,44 @@
 import AppHeader from "@/src/components/AppHeader";
 import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
+import { useCurrentUser } from "@/src/hooks/useCurrentUser";
+import { api, type RankingEntry } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
-const ranking = [
-  { pos: 1, name: "Antonio", score: 1000, bg: "bg-[#6B7280]", text: "text-white" },
-  { pos: 2, name: "Galdino", score: 150, bg: "bg-[#FFD700]", text: "text-black" },
-  { pos: 3, name: "Henrique", score: 140, bg: "bg-[#C0C0C0]", text: "text-black" },
-  { pos: 4, name: "Jorge Lima", score: 130, bg: "bg-[#CD7F32]", text: "text-white" },
-  { pos: 5, name: "Rodrigo", score: 130, bg: "bg-[#CD7F32]", text: "text-white" },
-  { pos: 6, name: "Thiago", score: 15, bg: "bg-[#374151]", text: "text-white" },
-] as const;
+const rowStyle = (position: number) => {
+  if (position === 1) return "bg-[#FFD700] text-black";
+  if (position === 2) return "bg-[#C0C0C0] text-black";
+  if (position === 3) return "bg-[#CD7F32] text-white";
+  return "bg-[#374151] text-white";
+};
 
 export default function HomePage() {
+  const { isLoading } = useCurrentUser({ redirectToLogin: true });
+  const [ranking, setRanking] = useState<RankingEntry[]>([]);
+
+  useEffect(() => {
+    async function loadRanking() {
+      try {
+        const response = await api.rankings();
+        setRanking(response.rankings.slice(0, 6));
+      } catch {
+        setRanking([]);
+      }
+    }
+
+    void loadRanking();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-full flex-1 items-center justify-center text-white">
+        Carregando...
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-5">
       <AppHeader  />
@@ -35,25 +60,30 @@ export default function HomePage() {
             RANKING ATUAL
           </p>
           <ul className="flex flex-col gap-2">
-            {ranking.map((player) => (
+            {ranking.map((player, index) => (
               <li
-                key={player.pos}
-                className={`mx-1 flex items-center justify-between rounded-sm px-3 py-0.5 sm:px-4 ${player.bg} ${player.text}`}
+                key={player.user_id}
+                className={`mx-1 flex items-center justify-between rounded-sm px-3 py-0.5 sm:px-4 ${rowStyle(player.position ?? index + 1)}`}
               >
                 <span className="w-6 shrink-0 text-center text-sm font-bold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill]">
-                  {player.pos}
+                  {player.position ?? index + 1}
                 </span>
                 <span
                   className={`${gajrajOne.className} mx-3 flex min-w-0 flex-1 items-center gap-2 truncate text-xs text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:text-sm`}
                 >
-                  <span className="truncate">{player.name}</span>
+                  <span className="truncate">{player.nickname}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2 text-xs font-semibold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:text-sm">
-                  {player.score}
+                  {player.points}
                   <Avatar className="h-5 w-5 sm:h-6 sm:w-6" />
                 </span>
               </li>
             ))}
+            {ranking.length === 0 ? (
+              <li className="text-center text-sm text-white/70">
+                Nenhum ranking ativo encontrado.
+              </li>
+            ) : null}
           </ul>
         </section>
 
@@ -64,12 +94,12 @@ export default function HomePage() {
           >
             Jogar
           </Link>
-          <button
+          {/* <button
             type="button"
             className={`${gajrajOne.className} h-12 w-full max-w-[280px] rounded-lg border border-[#FFD700] px-4 text-xl text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-black`}
           >
             NORMAL
-          </button>
+          </button> */}
         </div>
       </div>
       <BottomNav active="home" />
