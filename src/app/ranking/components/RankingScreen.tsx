@@ -3,6 +3,7 @@
 import AppHeader from "@/src/components/AppHeader";
 import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
+import RankPoints from "@/src/components/RankPoints";
 import { api, type RankingEntry } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import { ChevronLeft, ChevronRight, Gem, Medal, Shield, Sparkles, Trophy } from "lucide-react";
@@ -179,10 +180,11 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
                 </p>
               </div>
             </div>
-            <span className={`${gajrajOne.className} flex items-center gap-1 text-sm text-[#FFD700]`}>
-              {player.points}
-              <Avatar className="size-5" />
-            </span>
+            <RankPoints
+              value={player.points}
+              className={`${gajrajOne.className} text-sm text-[#FFD700]`}
+              starClassName="size-4"
+            />
           </article>
         ))}
       </section>

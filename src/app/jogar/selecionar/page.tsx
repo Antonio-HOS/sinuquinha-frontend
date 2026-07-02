@@ -74,7 +74,7 @@ function SelectPlayerContent() {
 
   return (
     <MatchShell exitButton={false}>
-      <div className="scrollbar-visible mx-auto flex max-h-[calc(100vh-180px)] min-h-0 w-full max-w-[344px] flex-1 flex-col pr-2">
+      <div className="mx-auto flex max-h-[calc(100vh-180px)] min-h-0 w-full max-w-[344px] flex-1 flex-col overflow-hidden pr-2">
         <MatchTitle
           title="Selecionar"
           subtitle="Jogador"
@@ -98,44 +98,7 @@ function SelectPlayerContent() {
           </label>
         </section>
 
-        <section className="mt-6 rounded-xl border border-white/15 bg-white/10 p-4 pb-5">
-          <div className="flex items-center justify-between">
-            <h2
-              className={`${gajrajOne.className} text-xl tracking-[0.08em] text-[#FFEDAD]`}
-            >
-              Amigos
-            </h2>
-            <span className="rounded-full bg-[#2AC054]/20 px-2 py-1 text-xs text-[#2AC054]">
-              {availableUsers.length} disponíveis
-            </span>
-          </div>
-          <div className="mt-4 flex flex-col gap-2">
-            {availableUsers.map((friend) => (
-              <button
-                key={friend.id}
-                type="button"
-                onClick={() => toggleSelectedUser(friend)}
-                className="rounded-lg text-left transition-colors hover:bg-white/10"
-              >
-                <PlayerPill
-                  name={friend.nickname}
-                  status={
-                    selectedUsers.some((item) => item.id === friend.id)
-                      ? "OK"
-                      : "+"
-                  }
-                />
-              </button>
-            ))}
-            {availableUsers.length === 0 ? (
-              <p className="text-center text-sm text-white/70">
-                Nenhum jogador encontrado.
-              </p>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-xl border border-[#FFD700]/30 bg-black/15 p-3 text-center">
+        <section className="mt-6 shrink-0 rounded-xl border border-[#FFD700]/30 bg-black/15 p-3 text-center">
           <p className="text-sm tracking-[0.12em] text-[#FFEDAD]">
             Selecionados: {selectedUsers.length}/{config.requiredOpponents}
           </p>
@@ -153,6 +116,45 @@ function SelectPlayerContent() {
           >
             Continuar
           </button>
+        </section>
+
+        <section className="mt-4 flex min-h-0 flex-1 flex-col rounded-xl border border-white/15 bg-white/10 p-4">
+          <div className="flex shrink-0 items-center justify-between">
+            <h2
+              className={`${gajrajOne.className} text-xl tracking-[0.08em] text-[#FFEDAD]`}
+            >
+              Amigos
+            </h2>
+            <span className="rounded-full bg-[#2AC054]/20 px-2 py-1 text-xs text-[#2AC054]">
+              {availableUsers.length} disponíveis
+            </span>
+          </div>
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-2 pb-1">
+              {availableUsers.map((friend) => (
+                <button
+                  key={friend.id}
+                  type="button"
+                  onClick={() => toggleSelectedUser(friend)}
+                  className="rounded-lg text-left transition-colors hover:bg-white/10"
+                >
+                  <PlayerPill
+                    name={friend.nickname}
+                    status={
+                      selectedUsers.some((item) => item.id === friend.id)
+                        ? "OK"
+                        : "+"
+                    }
+                  />
+                </button>
+              ))}
+              {availableUsers.length === 0 ? (
+                <p className="text-center text-sm text-white/70">
+                  Nenhum jogador encontrado.
+                </p>
+              ) : null}
+            </div>
+          </div>
         </section>
       </div>
     </MatchShell>

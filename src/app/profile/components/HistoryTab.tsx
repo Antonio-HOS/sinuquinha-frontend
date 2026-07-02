@@ -1,5 +1,7 @@
 import { gajrajOne } from "@/src/fonts";
+import RankPoints from "@/src/components/RankPoints";
 import { formatMatchDuration, type Match, type User } from "@/src/lib/api";
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 type HistoryTabProps = {
@@ -111,7 +113,7 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
                     Points
                   </span>
                   <strong className={`${gajrajOne.className} text-lg leading-none text-white`}>
-                    {values.points}
+                    <RankPoints value={values.points} starClassName="size-3.5" />
                   </strong>
                 </div>
                 <div className="rounded-lg bg-black/20 px-3 py-2 text-center">
@@ -164,7 +166,10 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
                 <DetailItem label="Melhor de" value={String(selectedMatch.best_of)} />
                 <DetailItem label="Início" value={formatDateTime(selectedMatch.started_at)} />
                 <DetailItem label="Fim" value={formatDateTime(selectedMatch.ended_at)} />
-                <DetailItem label="Points" value={selectedValues.points} />
+                <DetailItem
+                  label="Points"
+                  value={<RankPoints value={selectedValues.points} starClassName="size-3.5" />}
+                />
                 <DetailItem
                   label="Moedas"
                   value={selectedValues.coins > 0 ? `+${selectedValues.coins}` : String(selectedValues.coins)}
@@ -211,7 +216,13 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
   return (
     <div className="rounded-lg bg-black/20 px-3 py-2">
       <span className="block text-[10px] uppercase tracking-[0.14em] text-white/55">

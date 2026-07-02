@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { gajrajOne } from "@/src/fonts";
+import RankPoints from "@/src/components/RankPoints";
 import type { User } from "@/src/lib/api";
 import Link from "next/link";
 
@@ -69,8 +70,9 @@ export default function FriendsTab({ users, currentUserId }: FriendsTabProps) {
                   <span className={`${gajrajOne.className} text-white/40 text-[10px] mt-0.5`}>
                     {item.registration_number ?? item.email}
                   </span>
-                  <span className={`${gajrajOne.className} text-white text-[10px] mt-2 underline decoration-white/40 underline-offset-4`}>
-                    Rank: {item.rank_points}
+                  <span className={`${gajrajOne.className} text-white text-[10px] mt-2 underline decoration-white/40 underline-offset-4 inline-flex items-center gap-1`}>
+                    Rank:
+                    <RankPoints value={item.rank_points} starClassName="size-3" />
                   </span>
                 </div>
                 <Link

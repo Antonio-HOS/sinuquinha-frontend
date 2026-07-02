@@ -16,7 +16,7 @@ export function MatchShell({ children, score = 150, exitButton = true }: MatchSh
   return (
     <div className="flex min-h-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-5">
       <AppHeader score={score} />
-      <main className="relative flex flex-1 flex-col ">
+      <main className="relative flex min-h-0 flex-1 flex-col">
         {exitButton && <Link
           href="/jogar"
           className={`${gajrajOne.className} absolute right-1 top-1 z-10 flex h-8 w-16 items-center justify-center border border-[#FFD700] text-sm text-[#FFD700] transition-colors hover:bg-[#FFD700] hover:text-black`}

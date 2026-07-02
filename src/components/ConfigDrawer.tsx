@@ -2,8 +2,11 @@
 
 import { ArrowLeft, LogOut } from "lucide-react";
 import { gajrajOne } from "@/src/fonts";
-import { clearAccessToken } from "@/src/lib/api";
+import { useCurrentUser, USER_UPDATED_EVENT } from "@/src/hooks/useCurrentUser";
+import { api, clearAccessToken } from "@/src/lib/api";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getButtonClassName } from "./Button";
 
 type ConfigDrawerProps = {
   isOpen: boolean;
@@ -12,11 +15,71 @@ type ConfigDrawerProps = {
 
 export default function ConfigDrawer({ isOpen, onClose }: ConfigDrawerProps) {
   const router = useRouter();
+  const { user, setUser } = useCurrentUser();
+  const [isNicknameFormOpen, setIsNicknameFormOpen] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsNicknameFormOpen(false);
+      setNicknameError("");
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isNicknameFormOpen && user) {
+      setNickname(user.nickname);
+      setNicknameError("");
+    }
+  }, [isNicknameFormOpen, user]);
 
   const handleLogout = () => {
     clearAccessToken();
     onClose();
     router.replace("/login");
+  };
+
+  const handleOpenNicknameForm = () => {
+    setIsNicknameFormOpen(true);
+  };
+
+  const handleCancelNicknameForm = () => {
+    setIsNicknameFormOpen(false);
+    setNicknameError("");
+  };
+
+  const handleSaveNickname = async () => {
+    const trimmedNickname = nickname.trim();
+
+    if (trimmedNickname.length < 2) {
+      setNicknameError("Apelido deve ter pelo menos 2 caracteres.");
+      return;
+    }
+
+    if (trimmedNickname === user?.nickname) {
+      setIsNicknameFormOpen(false);
+      return;
+    }
+
+    setIsSavingNickname(true);
+    setNicknameError("");
+
+    try {
+      const updatedUser = await api.updateMe({ nickname: trimmedNickname });
+      setUser(updatedUser);
+      window.dispatchEvent(
+        new CustomEvent(USER_UPDATED_EVENT, { detail: updatedUser }),
+      );
+      setIsNicknameFormOpen(false);
+    } catch (err) {
+      setNicknameError(
+        err instanceof Error ? err.message : "Não foi possível atualizar o apelido.",
+      );
+    } finally {
+      setIsSavingNickname(false);
+    }
   };
 
   return (
@@ -41,13 +104,71 @@ export default function ConfigDrawer({ isOpen, onClose }: ConfigDrawerProps) {
           <ArrowLeft className="w-6 h-6" />
         </button>
 
-        {/* Opções do Menu */}
         <div className="flex flex-col gap-6">
-          <button 
-            className={`${gajrajOne.className} text-white text-lg text-left hover:text-[#FFD700] transition-colors`}
-          >
-            Mudar Apelido
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleOpenNicknameForm}
+              className={`${gajrajOne.className} text-white text-lg text-left hover:text-[#FFD700] transition-colors`}
+            >
+              Mudar Apelido
+            </button>
+
+            {isNicknameFormOpen ? (
+              <form
+                className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void handleSaveNickname();
+                }}
+              >
+                <label className="flex flex-col gap-2">
+                  <span className={`${gajrajOne.className} text-sm text-[#FFEDAD]`}>
+                    Novo apelido
+                  </span>
+                  <input
+                    type="text"
+                    value={nickname}
+                    onChange={(event) => setNickname(event.target.value)}
+                    placeholder="Seu apelido"
+                    maxLength={40}
+                    autoFocus
+                    className="h-10 rounded-md bg-white px-3 text-sm text-black outline-none placeholder:text-black/35"
+                  />
+                </label>
+
+                {nicknameError ? (
+                  <p className="text-sm text-red-400">{nicknameError}</p>
+                ) : null}
+
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isSavingNickname}
+                    className={getButtonClassName({
+                      variant: "success",
+                      size: "sm",
+                      className: "flex-1 disabled:opacity-50",
+                    })}
+                  >
+                    {isSavingNickname ? "Salvando..." : "Salvar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelNicknameForm}
+                    disabled={isSavingNickname}
+                    className={getButtonClassName({
+                      variant: "ghost",
+                      size: "sm",
+                      className: "flex-1 disabled:opacity-50",
+                    })}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : null}
+          </div>
 
           <button 
             type="button"
