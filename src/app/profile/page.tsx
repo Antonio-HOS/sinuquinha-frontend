@@ -73,7 +73,7 @@ export default function ProfilePage() {
             <>Copiado! ✅</>
           ) : (
             <>
-              {user?.id} <span className="text-xs">📋</span>
+              {user?.id.slice(0, 10)}...{user?.id.slice(-4)} <span className="text-xs">📋</span>
             </>
           )}
         </button>
