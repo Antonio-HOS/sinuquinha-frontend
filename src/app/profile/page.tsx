@@ -1,12 +1,15 @@
 "use client";
 
 import AppHeader from "@/src/components/AppHeader";
-import Avatar from "@/src/components/Avatar";
+import { Avatar } from "@/src/components/Avatar";
+import { AvatarSelector } from "@/src/components/AvatarSelector";
+import Button from "@/src/components/Button";
 import BottomNav from "@/src/components/BottomNav";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api, type Match, type User, type UserStats } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import { useEffect, useState } from "react";
+import { Edit2 } from "lucide-react";
 import HistoryTab from "./components/HistoryTab";
 import StatsTab from "./components/StatsTab";
 import FriendsTab from "./components/FriendsTab";
@@ -14,10 +17,14 @@ import FriendsTab from "./components/FriendsTab";
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("historico");
   const [copiado, setCopiado] = useState(false);
-  const { user, isLoading } = useCurrentUser({ redirectToLogin: true });
+  const { user, setUser, isLoading } = useCurrentUser({ redirectToLogin: true });
   const [stats, setStats] = useState<UserStats | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfileData() {
@@ -34,8 +41,13 @@ export default function ProfilePage() {
 
     if (user) {
       void loadProfileData();
+      const currentAvatarId = user.avatar_id ? Number.parseInt(user.avatar_id, 10) : null;
+
+      if (!editMode && selectedAvatarId === null) {
+        setSelectedAvatarId(currentAvatarId);
+      }
     }
-  }, [user]);
+  }, [user, editMode, selectedAvatarId]);
 
   const handleCopiarId = () => {
     if (!user) return;
@@ -44,6 +56,35 @@ export default function ProfilePage() {
     setTimeout(() => {
       setCopiado(false);
     }, 2000);
+  };
+
+  const currentAvatarId = editMode
+    ? selectedAvatarId
+    : user?.avatar_id
+      ? Number.parseInt(user.avatar_id, 10)
+      : null;
+
+  const handleSaveAvatar = async () => {
+    if (!selectedAvatarId) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const updatedUser = await api.updateMe({ avatarId: String(selectedAvatarId) });
+      setUser(updatedUser);
+      setEditMode(false);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Não foi possível salvar o avatar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setSelectedAvatarId(user?.avatar_id ? Number.parseInt(user.avatar_id, 10) : null);
+    setError(null);
   };
 
   if (isLoading) {
@@ -99,7 +140,15 @@ export default function ProfilePage() {
 
         {/* Avatar */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 overflow-hidden flex items-center justify-center relative">
-          <Avatar className="w-full h-full" />
+          <button
+            type="button"
+            onClick={() => setEditMode(true)}
+            className={`transition-transform duration-300 ${editMode ? "cursor-default" : "cursor-pointer hover:scale-105"}`}
+            disabled={editMode}
+            aria-label="Alterar avatar"
+          >
+            <Avatar avatarId={currentAvatarId} size="xl" />
+          </button>
         </div>
 
         <div className="flex flex-col items-center w-24">
@@ -107,6 +156,44 @@ export default function ProfilePage() {
           <span className={`${gajrajOne.className} text-white text-[10px] sm:text-xs uppercase mt-1`}>RANK</span>
         </div>
       </div>
+
+      {editMode ? (
+        <section className="mt-2 rounded-2xl border border-[#FFD700]/30 bg-black/20 p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className={`${gajrajOne.className} text-lg text-[#FFD700]`}>Escolha seu avatar</h2>
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="text-sm text-white/70 transition hover:text-white"
+            >
+              Cancelar
+            </button>
+          </div>
+
+          <AvatarSelector
+            value={selectedAvatarId}
+            onChange={setSelectedAvatarId}
+            className="mb-4"
+          />
+
+          {error ? <p className="mb-3 text-sm text-red-300">{error}</p> : null}
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+              disabled={isSaving}
+            >
+              Voltar
+            </button>
+            <Button onClick={handleSaveAvatar} disabled={isSaving || selectedAvatarId === null} variant="secondary" className="gap-2">
+              <Edit2 size={16} />
+              {isSaving ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {/* Tabs */}
       <div className="flex justify-between w-full border-b-2 border-white/10 mb-4 relative">

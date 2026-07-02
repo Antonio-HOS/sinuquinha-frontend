@@ -7,6 +7,7 @@ import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api, type RankingEntry } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const rowStyle = (position: number) => {

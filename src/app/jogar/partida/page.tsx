@@ -179,6 +179,7 @@ function ActiveMatchContent() {
                 name={entry.name}
                 score={entry.score}
                 status={entry.status}
+                avatarId={userById.get(entry.targetUserId)?.avatar_id ? Number.parseInt(userById.get(entry.targetUserId)?.avatar_id ?? "", 10) : null}
               />
               <p className="min-h-8 text-center text-[10px] text-white/70">
                 {entry.description}

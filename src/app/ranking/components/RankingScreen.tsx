@@ -6,6 +6,7 @@ import BottomNav from "@/src/components/BottomNav";
 import { api, type RankingEntry } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import { ChevronLeft, ChevronRight, Gem, Medal, Shield, Sparkles, Trophy } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -163,7 +164,10 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
               {player.position ?? index + 1}
             </span>
             <div className="flex min-w-0 items-center gap-3">
-              <Avatar className="size-9" />
+              <Avatar
+                avatarId={player.avatar_id ? Number.parseInt(player.avatar_id, 10) : null}
+                className="size-9"
+              />
               <div className="min-w-0">
                 <h2 className={`${gajrajOne.className} truncate text-sm text-white`}>
                   {player.nickname}
@@ -181,7 +185,7 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
             </div>
             <span className={`${gajrajOne.className} flex items-center gap-1 text-sm text-[#FFD700]`}>
               {player.points}
-              <Avatar className="size-5" />
+              <Image src="/rucoin.svg" alt="" width={20} height={20} aria-hidden />
             </span>
           </article>
         ))}

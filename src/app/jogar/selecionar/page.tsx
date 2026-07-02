@@ -119,6 +119,7 @@ function SelectPlayerContent() {
               >
                 <PlayerPill
                   name={friend.nickname}
+                  avatarId={friend.avatar_id ? Number.parseInt(friend.avatar_id, 10) : null}
                   status={
                     selectedUsers.some((item) => item.id === friend.id)
                       ? "OK"

@@ -1,7 +1,7 @@
 import { gajrajOne } from "@/src/fonts";
 import type { ButtonHTMLAttributes } from "react";
 
-type ButtonVariant = "primary" | "outline" | "danger" | "success" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "outline" | "danger" | "success" | "ghost";
 type ButtonSize = "sm" | "md" | "lg";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -12,6 +12,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "border-[#FFD700] bg-[#FFD700] text-black hover:bg-[#FFEDAD]",
+  secondary: "border-[#FFD700] bg-transparent text-[#FFD700] hover:bg-[#FFD700] hover:text-black",
   outline: "border-[#FFD700] bg-transparent text-[#FFD700] hover:bg-[#FFD700] hover:text-black",
   danger: "border-[#FFD700] bg-transparent text-[#FFD700] hover:bg-[#FFD700] hover:text-black",
   success: "border-[#2AC054] bg-transparent text-[#2AC054] hover:bg-[#2AC054] hover:text-[#004C55]",

@@ -120,12 +120,13 @@ type PlayerPillProps = {
   name: string;
   status?: string;
   href?: string;
+  avatarId?: number | null;
 };
 
-export function PlayerPill({ name, status, href }: PlayerPillProps) {
+export function PlayerPill({ name, status, href, avatarId }: PlayerPillProps) {
   const content = (
     <>
-      <Avatar className="size-12 border border-[#FFEDAD]/60" />
+      <Avatar avatarId={avatarId} className="size-12 border border-[#FFEDAD]/60" />
       <span className={`${gajrajOne.className} text-sm tracking-[0.07em] text-[#FFD700]`}>
         {name}
       </span>
@@ -152,16 +153,18 @@ type MatchPlayerCardProps = {
   name: string;
   score?: number;
   status?: string;
+  avatarId?: number | null;
 };
 
 export function MatchPlayerCard({
   name,
   score = 0,
   status = "Confirmado",
+  avatarId,
 }: MatchPlayerCardProps) {
   return (
     <article className="flex min-h-[158px] flex-col items-center justify-center rounded border border-[#FFD700]/70 bg-white/10 p-3 text-center">
-      <Avatar className="size-16 border-2 border-[#FFEDAD]/70" />
+      <Avatar avatarId={avatarId} className="size-16 border-2 border-[#FFEDAD]/70" />
       <h2 className={`${gajrajOne.className} mt-3 text-lg tracking-[0.08em] text-[#FFD700]`}>
         {name}
       </h2>
