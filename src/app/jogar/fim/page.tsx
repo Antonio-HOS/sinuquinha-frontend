@@ -43,6 +43,11 @@ function MatchEndContent() {
   const winnerNames = winnerPlayers
     .map((player) => userById.get(player.user_id)?.nickname ?? player.user_id.slice(0, 8))
     .join(" + ");
+  const winnerAvatarId = winnerPlayers[0]
+    ? userById.get(winnerPlayers[0].user_id)?.avatar_id
+      ? Number.parseInt(userById.get(winnerPlayers[0].user_id)?.avatar_id ?? "", 10)
+      : null
+    : null;
   const isCurrentUserWinner = Boolean(
     user?.id && winnerPlayers.some((player) => player.user_id === user.id),
   );
@@ -77,7 +82,7 @@ function MatchEndContent() {
 
           <section className="mt-4 flex w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-3">
             <div className="flex items-center justify-center gap-3">
-              <Avatar className="size-14 border-2 border-[#FFEDAD]/70" />
+              <Avatar avatarId={winnerAvatarId} className="size-14 border-2 border-[#FFEDAD]/70" />
               <div className="text-center">
                 <p className="text-xs uppercase tracking-[0.16em] text-[#FFEDAD]/70">
                   {winnerPlayers.length > 1 ? "Vencedores" : "Jogador"}

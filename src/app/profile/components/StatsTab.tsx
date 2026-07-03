@@ -1,5 +1,6 @@
-import Avatar from "@/src/components/Avatar";
+
 import { gajrajOne } from "@/src/fonts";
+import Avatar from "@/src/components/Avatar";
 import type { User, UserStats } from "@/src/lib/api";
 
 type StatsTabProps = {
@@ -41,7 +42,7 @@ export default function StatsTab({ stats, user }: StatsTabProps) {
           <span className={`${gajrajOne.className} text-[10px] sm:text-xs text-white text-center uppercase`}>Saldo De Moedas</span>
           <div className={`${gajrajOne.className} text-lg sm:text-xl text-white mt-1 flex items-center justify-center gap-2`}>
             <div className="w-5 h-5 rounded-full overflow-hidden border-[1.5px] border-[#FFD700] flex items-center justify-center relative">
-              <Avatar className="w-full h-full object-cover" />
+              <Avatar avatarId={user?.avatar_id ? Number.parseInt(user.avatar_id, 10) : null} className="size-5" />
             </div>
             {coinBalance}
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import AppHeader from "@/src/components/AppHeader";
+import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
 import RankPoints from "@/src/components/RankPoints";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
@@ -69,8 +70,12 @@ export default function HomePage() {
                   {player.position ?? index + 1}
                 </span>
                 <span
-                  className={`${gajrajOne.className} mx-3 flex min-w-0 flex-1 items-center gap-2 truncate text-xs text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:text-sm`}
+                  className={`${gajrajOne.className}  flex min-w-0 flex-1 items-center gap-1.5 truncate text-xs text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:gap-2 sm:text-sm`}
                 >
+                  <Avatar
+                    avatarId={player.avatar_id ? Number.parseInt(player.avatar_id, 10) : null}
+                    className="size-6 border border-black/25 sm:size-7"
+                  />
                   <span className="truncate">{player.nickname}</span>
                 </span>
                 <RankPoints

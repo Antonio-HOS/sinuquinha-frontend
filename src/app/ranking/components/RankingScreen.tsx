@@ -164,7 +164,10 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
               {player.position ?? index + 1}
             </span>
             <div className="flex min-w-0 items-center gap-3">
-              <Avatar className="size-9" />
+              <Avatar
+                avatarId={player.avatar_id ? Number.parseInt(player.avatar_id, 10) : null}
+                className="size-9"
+              />
               <div className="min-w-0">
                 <h2 className={`${gajrajOne.className} truncate text-sm text-white`}>
                   {player.nickname}
@@ -182,7 +185,7 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
             </div>
             <RankPoints
               value={player.points}
-              className={`${gajrajOne.className} text-sm text-[#FFD700]`}
+              className={`${gajrajOne.className} flex items-center gap-1 text-sm text-[#FFD700]`}
               starClassName="size-4"
             />
           </article>

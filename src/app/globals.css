@@ -42,3 +42,33 @@ body {
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+.avatar-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.avatar-selector-item {
+  aspect-ratio: 1 / 1;
+  border-radius: 10%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.2rem;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.avatar-selector-item:hover {
+  transform: translateY(-1px) scale(1.02);
+  border-color: rgba(255, 215, 0, 0.65);
+}
+
+.avatar-selector-item--selected {
+  border-color: #ffd700;
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.18), 0 10px 30px rgba(255, 215, 0, 0.18);
+}
+
+.avatar-selector-image {
+  width: 100%;
+  height: 100%;
+}

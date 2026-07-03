@@ -1,13 +1,14 @@
 "use client";
 
 import AppHeader from "@/src/components/AppHeader";
-import Avatar from "@/src/components/Avatar";
+import { Avatar } from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
 import RankPoints from "@/src/components/RankPoints";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api, type Match, type User, type UserStats } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import { useEffect, useState } from "react";
+import AvatarEditModal from "./components/AvatarEditModal";
 import HistoryTab from "./components/HistoryTab";
 import StatsTab from "./components/StatsTab";
 import FriendsTab from "./components/FriendsTab";
@@ -15,10 +16,14 @@ import FriendsTab from "./components/FriendsTab";
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("historico");
   const [copiado, setCopiado] = useState(false);
-  const { user, isLoading } = useCurrentUser({ redirectToLogin: true });
+  const { user, setUser, isLoading } = useCurrentUser({ redirectToLogin: true });
   const [stats, setStats] = useState<UserStats | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfileData() {
@@ -35,8 +40,13 @@ export default function ProfilePage() {
 
     if (user) {
       void loadProfileData();
+      const currentAvatarId = user.avatar_id ? Number.parseInt(user.avatar_id, 10) : null;
+
+      if (!editMode && selectedAvatarId === null) {
+        setSelectedAvatarId(currentAvatarId);
+      }
     }
-  }, [user]);
+  }, [user, editMode, selectedAvatarId]);
 
   const handleCopiarId = () => {
     if (!user) return;
@@ -45,6 +55,35 @@ export default function ProfilePage() {
     setTimeout(() => {
       setCopiado(false);
     }, 2000);
+  };
+
+  const currentAvatarId = editMode
+    ? selectedAvatarId
+    : user?.avatar_id
+      ? Number.parseInt(user.avatar_id, 10)
+      : null;
+
+  const handleSaveAvatar = async () => {
+    if (!selectedAvatarId) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const updatedUser = await api.updateMe({ avatarId: String(selectedAvatarId) });
+      setUser(updatedUser);
+      setEditMode(false);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Não foi possível salvar o avatar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setSelectedAvatarId(user?.avatar_id ? Number.parseInt(user.avatar_id, 10) : null);
+    setError(null);
   };
 
   if (isLoading) {
@@ -100,7 +139,14 @@ export default function ProfilePage() {
 
         {/* Avatar */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 overflow-hidden flex items-center justify-center relative">
-          <Avatar className="w-full h-full" />
+          <button
+            type="button"
+            onClick={() => setEditMode(true)}
+            className="cursor-pointer transition-transform duration-300 hover:scale-105"
+            aria-label="Alterar avatar"
+          >
+            <Avatar avatarId={currentAvatarId} size="xl" />
+          </button>
         </div>
 
         <div className="flex flex-col items-center w-24">
@@ -112,6 +158,17 @@ export default function ProfilePage() {
           <span className={`${gajrajOne.className} text-white text-[10px] sm:text-xs uppercase mt-1`}>RANK</span>
         </div>
       </div>
+
+      {editMode ? (
+        <AvatarEditModal
+          selectedAvatarId={selectedAvatarId}
+          isSaving={isSaving}
+          error={error}
+          onChange={setSelectedAvatarId}
+          onSave={() => void handleSaveAvatar()}
+          onClose={handleCancelEdit}
+        />
+      ) : null}
 
       {/* Tabs */}
       <div className="flex justify-between w-full border-b-2 border-white/10 mb-4 relative">
