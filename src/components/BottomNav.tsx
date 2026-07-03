@@ -9,16 +9,14 @@ const iconClass = (active: boolean) =>
 
 export default function BottomNav({ active = "home" }: BottomNavProps) {
   return (
-    <nav className="mt-auto 
-    -mx-4 sm:-mx-5
-    -mb-4 
-    flex 
-    w-[calc(100%+2rem)] sm:w-[calc(100%+2.5rem)] 
-    items-center 
-    justify-around 
-    border-t border-[#FFEDAD] bg-[#004C55]/95 px-4 sm:px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm
-     "
-    >
+    <>
+      <div
+        aria-hidden
+        className="h-(--bottom-nav-height) shrink-0 md:hidden"
+      />
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 flex w-full items-center justify-around border-t border-[#FFEDAD] bg-[#004C55]/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm md:relative md:inset-x-auto md:bottom-auto md:z-auto md:mt-auto md:-mx-4 md:-mb-4 md:w-[calc(100%+2rem)] sm:md:-mx-5 sm:md:w-[calc(100%+2.5rem)] sm:md:px-5"
+      >
       <Link
         href="/home"
         className={`flex flex-1 justify-center ${iconClass(active === "home")}`}
@@ -44,6 +42,7 @@ export default function BottomNav({ active = "home" }: BottomNavProps) {
         <ProfileIcon />
       </Link>
     </nav>
+    </>
   );
 }
 

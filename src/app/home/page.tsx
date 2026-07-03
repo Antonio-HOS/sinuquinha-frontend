@@ -1,8 +1,8 @@
 "use client";
 
 import AppHeader from "@/src/components/AppHeader";
-import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
+import RankPoints from "@/src/components/RankPoints";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api, type RankingEntry } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
@@ -74,10 +74,11 @@ export default function HomePage() {
                 >
                   <span className="truncate">{player.nickname}</span>
                 </span>
-                <span className="flex shrink-0 items-center gap-2 text-xs font-semibold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:text-sm">
-                  {player.points}
-                  <Avatar className="h-5 w-5 sm:h-6 sm:w-6" />
-                </span>
+                <RankPoints
+                  value={player.points}
+                  className="shrink-0 text-xs font-semibold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:text-sm"
+                  starClassName="h-4 w-4 sm:h-5 sm:w-5"
+                />
               </li>
             ))}
             {ranking.length === 0 ? (

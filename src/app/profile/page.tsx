@@ -5,6 +5,7 @@ import { Avatar } from "@/src/components/Avatar";
 import { AvatarSelector } from "@/src/components/AvatarSelector";
 import Button from "@/src/components/Button";
 import BottomNav from "@/src/components/BottomNav";
+import RankPoints from "@/src/components/RankPoints";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api, type Match, type User, type UserStats } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
@@ -113,7 +114,7 @@ export default function ProfilePage() {
             <>Copiado! ✅</>
           ) : (
             <>
-              {user?.id} <span className="text-xs">📋</span>
+              {user?.id.slice(0, 10)}...{user?.id.slice(-4)} <span className="text-xs">📋</span>
             </>
           )}
         </button>
@@ -152,7 +153,11 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-col items-center w-24">
-          <span className={`${gajrajOne.className} text-2xl text-white`}>{user?.rank_points ?? 0}</span>
+          <RankPoints
+            value={user?.rank_points ?? 0}
+            className={`${gajrajOne.className} text-2xl text-white`}
+            starClassName="size-5"
+          />
           <span className={`${gajrajOne.className} text-white text-[10px] sm:text-xs uppercase mt-1`}>RANK</span>
         </div>
       </div>

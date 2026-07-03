@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.sinuk.online}
+    container_name: sinuquinha-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.sinuk.online}
+    ports:
+      - "${FRONTEND_PORT:-3002}:3002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002', (r) => {process.exit(r.statusCode === 200 || r.statusCode === 404 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
