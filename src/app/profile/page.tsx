@@ -158,7 +158,7 @@ export default function ProfilePage() {
       </div>
 
       {editMode ? (
-        <section className="mt-2 rounded-2xl border border-[#FFD700]/30 bg-black/20 p-4">
+        <section className="mt-2 rounded-2xl border border-[#FFD700]/30 bg-black/20 p-4 mx-auto max-w-md">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className={`${gajrajOne.className} text-lg text-[#FFD700]`}>Escolha seu avatar</h2>
             <button

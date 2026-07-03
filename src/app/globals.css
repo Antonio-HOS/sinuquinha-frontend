@@ -48,7 +48,7 @@ body {
 
 .avatar-selector-item {
   aspect-ratio: 1 / 1;
-  border-radius: 9999px;
+  border-radius: 10%;
   border: 2px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
   padding: 0.2rem;

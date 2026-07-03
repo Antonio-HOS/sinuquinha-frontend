@@ -10,7 +10,7 @@ type AvatarSelectorProps = {
 
 export function AvatarSelector({ value, onChange, className = "" }: AvatarSelectorProps) {
   return (
-    <div className={cn("avatar-selector-grid", className)}>
+    <div className={cn("grid grid-cols-3 gap-4 place-items-center sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-4", className)}>
       {availableAvatarIds.map((id) => {
         const selected = value === id;
 
@@ -23,7 +23,7 @@ export function AvatarSelector({ value, onChange, className = "" }: AvatarSelect
             aria-pressed={selected}
             aria-label={`Selecionar avatar ${id}`}
           >
-            <Avatar avatarId={id} size="lg" className="avatar-selector-image" />
+            <Avatar avatarId={id} size="md" className="sm:size-lg avatar-selector-image" />
           </button>
         );
       })}
