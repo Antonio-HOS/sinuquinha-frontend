@@ -2,15 +2,13 @@
 
 import AppHeader from "@/src/components/AppHeader";
 import { Avatar } from "@/src/components/Avatar";
-import { AvatarSelector } from "@/src/components/AvatarSelector";
-import Button from "@/src/components/Button";
 import BottomNav from "@/src/components/BottomNav";
 import RankPoints from "@/src/components/RankPoints";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api, type Match, type User, type UserStats } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
 import { useEffect, useState } from "react";
-import { Edit2 } from "lucide-react";
+import AvatarEditModal from "./components/AvatarEditModal";
 import HistoryTab from "./components/HistoryTab";
 import StatsTab from "./components/StatsTab";
 import FriendsTab from "./components/FriendsTab";
@@ -144,8 +142,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => setEditMode(true)}
-            className={`transition-transform duration-300 ${editMode ? "cursor-default" : "cursor-pointer hover:scale-105"}`}
-            disabled={editMode}
+            className="cursor-pointer transition-transform duration-300 hover:scale-105"
             aria-label="Alterar avatar"
           >
             <Avatar avatarId={currentAvatarId} size="xl" />
@@ -163,41 +160,14 @@ export default function ProfilePage() {
       </div>
 
       {editMode ? (
-        <section className="mt-2 rounded-2xl border border-[#FFD700]/30 bg-black/20 p-4 mx-auto max-w-md">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className={`${gajrajOne.className} text-lg text-[#FFD700]`}>Escolha seu avatar</h2>
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-              className="text-sm text-white/70 transition hover:text-white"
-            >
-              Cancelar
-            </button>
-          </div>
-
-          <AvatarSelector
-            value={selectedAvatarId}
-            onChange={setSelectedAvatarId}
-            className="mb-4"
-          />
-
-          {error ? <p className="mb-3 text-sm text-red-300">{error}</p> : null}
-
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-              className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
-              disabled={isSaving}
-            >
-              Voltar
-            </button>
-            <Button onClick={handleSaveAvatar} disabled={isSaving || selectedAvatarId === null} variant="secondary" className="gap-2">
-              <Edit2 size={16} />
-              {isSaving ? "Salvando..." : "Salvar"}
-            </Button>
-          </div>
-        </section>
+        <AvatarEditModal
+          selectedAvatarId={selectedAvatarId}
+          isSaving={isSaving}
+          error={error}
+          onChange={setSelectedAvatarId}
+          onSave={() => void handleSaveAvatar()}
+          onClose={handleCancelEdit}
+        />
       ) : null}
 
       {/* Tabs */}

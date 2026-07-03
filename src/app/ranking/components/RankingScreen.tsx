@@ -185,7 +185,7 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
             </div>
             <RankPoints
               value={player.points}
-              className={`${gajrajOne.className} text-sm text-[#FFD700]`}
+              className={`${gajrajOne.className} flex items-center gap-1 text-sm text-[#FFD700]`}
               starClassName="size-4"
             />
           </article>
