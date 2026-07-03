@@ -32,9 +32,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full overflow-hidden antialiased`}
     >
-      <body className={`${gajrajOne.className} min-h-full flex flex-col`}>
+      <body className={`${gajrajOne.className} flex h-full flex-col overflow-hidden`}>
         <AppProviders>
           <BackgroundShell>{children}</BackgroundShell>
         </AppProviders>
