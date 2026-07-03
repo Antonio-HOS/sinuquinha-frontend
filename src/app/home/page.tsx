@@ -52,7 +52,7 @@ export default function HomePage() {
         Sinuquinha
       </h1>
 
-      <div className="mt-8 flex flex-1 flex-col">
+      <div className="md:mt-8  mt-28 flex flex-1 flex-col">
         <section className="scrollbar-hidden flex flex-col gap-2 overflow-y-auto pb-6 h-[230px]">
           <p className="text-center text-xs font-medium tracking-[0.2em] text-white/80">
             <span className="mr-1" aria-hidden>

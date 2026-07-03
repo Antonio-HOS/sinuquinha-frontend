@@ -7,6 +7,7 @@ type AvatarProps = {
   avatarId?: number | null;
   size?: AvatarSize;
   className?: string;
+  objectFit?: "cover" | "contain";
 };
 
 const sizeMap: Record<Exclude<AvatarSize, number>, number> = {
@@ -16,7 +17,7 @@ const sizeMap: Record<Exclude<AvatarSize, number>, number> = {
   xl: 88,
 };
 
-export function Avatar({ avatarId, size, className = "" }: AvatarProps) {
+export function Avatar({ avatarId, size, className = "", objectFit = "cover" }: AvatarProps) {
   const numericSize = typeof size === "number" ? size : size ? sizeMap[size] : undefined;
 
   return (
@@ -30,7 +31,7 @@ export function Avatar({ avatarId, size, className = "" }: AvatarProps) {
         alt=""
         fill
         sizes={numericSize ? `${numericSize}px` : "64px"}
-        className="object-cover"
+        className={objectFit === "contain" ? "object-contain" : "object-cover"}
       />
     </span>
   );

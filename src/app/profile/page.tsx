@@ -138,14 +138,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Avatar */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 overflow-hidden flex items-center justify-center relative">
+        <div className="flex items-center justify-center">
           <button
             type="button"
             onClick={() => setEditMode(true)}
             className="cursor-pointer transition-transform duration-300 hover:scale-105"
             aria-label="Alterar avatar"
           >
-            <Avatar avatarId={currentAvatarId} size="xl" />
+            <Avatar avatarId={currentAvatarId} size="xl" objectFit="contain" />
           </button>
         </div>
 
@@ -171,7 +171,7 @@ export default function ProfilePage() {
       ) : null}
 
       {/* Tabs */}
-      <div className="flex justify-between w-full border-b-2 border-white/10 mb-4 relative">
+      <div className="flex justify-between w-full border-b-2 border-white/10 mb-4 relative -mt-5">
         {(["historico", "estatisticas", "amigos"] as const).map((tab) => (
           <button
             key={tab}
