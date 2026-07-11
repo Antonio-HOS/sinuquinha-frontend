@@ -219,6 +219,10 @@ export const api = {
     apiRequest<Match[]>(
       status ? `/matches?status=${encodeURIComponent(status)}` : "/matches",
     ),
+  matchesAll: (status = "") =>
+    apiRequest<Match[]>(
+      status ? `/matches/all?status=${encodeURIComponent(status)}` : "/matches/all",
+    ),
   matchesByUser: (userId: string, status = "") =>
     apiRequest<Match[]>(
       status

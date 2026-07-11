@@ -8,15 +8,28 @@ type HistoryTabProps = {
   matches: Match[];
   users: User[];
   currentUserId?: string;
+  variant?: "profile" | "global";
 };
 
-function getHistoryValues(match: Match, currentUserId?: string) {
-  const currentPlayer = match.players?.find((player) => player.user_id === currentUserId);
+function getHistoryValues(
+  match: Match,
+  currentUserId?: string,
+  userById?: Map<string, User>,
+) {
+  const currentPlayer = currentUserId
+    ? match.players?.find((player) => player.user_id === currentUserId)
+    : undefined;
+  const participated = Boolean(currentPlayer);
   const winnerCount =
     match.players?.filter((player) => player.result === "winner").length ?? 1;
   const isWinner = currentPlayer?.result === "winner";
   const isFinished = match.status === "finished";
   const totalReward = match.stake_coins * (match.players?.length ?? 0);
+  const winnerPlayer = match.players?.find((player) => player.result === "winner");
+  const winnerName = winnerPlayer
+    ? userById?.get(winnerPlayer.user_id)?.nickname ??
+      winnerPlayer.user_id.slice(0, 8)
+    : null;
   const points = !isFinished || !currentPlayer
     ? "-"
     : isWinner
@@ -24,19 +37,31 @@ function getHistoryValues(match: Match, currentUserId?: string) {
         ? "+66"
         : "+33"
       : "-30";
-  const coins = !isFinished || !currentPlayer
-    ? match.stake_coins
-    : isWinner
-      ? Math.floor(totalReward / Math.max(winnerCount, 1))
-      : -match.stake_coins;
+  const coins = !currentPlayer
+    ? "-"
+    : !isFinished
+      ? match.stake_coins
+      : isWinner
+        ? Math.floor(totalReward / Math.max(winnerCount, 1))
+        : -match.stake_coins;
 
   return {
-    result: !isFinished ? match.status : isWinner ? "Vitória" : "Derrota",
+    result: !isFinished
+      ? match.status
+      : participated
+        ? isWinner
+          ? "Vitória"
+          : "Derrota"
+        : winnerName
+          ? `Vencedor: ${winnerName}`
+          : "Finalizada",
     isWinner,
     isFinished,
+    participated,
     duration: formatMatchDuration(match),
     points,
     coins,
+    winnerName,
   };
 }
 
@@ -60,14 +85,19 @@ function getResultLabel(result: string) {
   return labels[result] ?? result;
 }
 
-export default function HistoryTab({ matches, users, currentUserId }: HistoryTabProps) {
+export default function HistoryTab({
+  matches,
+  users,
+  currentUserId,
+  variant = "profile",
+}: HistoryTabProps) {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const userById = useMemo(
     () => new Map(users.map((item) => [item.id, item])),
     [users],
   );
   const selectedValues = selectedMatch
-    ? getHistoryValues(selectedMatch, currentUserId)
+    ? getHistoryValues(selectedMatch, currentUserId, userById)
     : null;
 
   return (
@@ -79,11 +109,13 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
           </p>
         ) : null}
         {matches.map((item) => {
-          const values = getHistoryValues(item, currentUserId);
+          const values = getHistoryValues(item, currentUserId, userById);
           const resultClassName = values.isFinished
-            ? values.isWinner
-              ? "border-[#2AC054]/50 bg-[#2AC054]/15 text-[#2AC054]"
-              : "border-red-300/50 bg-red-500/10 text-red-200"
+            ? values.participated
+              ? values.isWinner
+                ? "border-[#2AC054]/50 bg-[#2AC054]/15 text-[#2AC054]"
+                : "border-red-300/50 bg-red-500/10 text-red-200"
+              : "border-[#7DD3FC]/50 bg-sky-500/10 text-sky-100"
             : "border-[#FFD700]/40 bg-[#FFD700]/10 text-[#FFD700]";
 
           return (
@@ -100,9 +132,12 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
                   </h3>
                   <p className="mt-1 text-xs tracking-widest text-[#FFEDAD]/75">
                     {item.mode} - {values.duration}
+                    {variant === "global" && values.winnerName
+                      ? ` - ${values.winnerName}`
+                      : ""}
                   </p>
                 </div>
-                <span className={`${gajrajOne.className} shrink-0 rounded-full border px-2 py-1 text-[10px] tracking-[0.08em] ${resultClassName}`}>
+                <span className={`${gajrajOne.className} shrink-0 rounded-full border px-2 py-1 text-[10px] tracking-[0.08em] max-w-[45%] truncate ${resultClassName}`}>
                   {values.result}
                 </span>
               </div>
@@ -121,7 +156,11 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
                     Moedas
                   </span>
                   <strong className={`${gajrajOne.className} inline-flex items-center justify-center gap-1 text-lg leading-none text-white`}>
-                    {values.coins > 0 ? `+${values.coins}` : values.coins}
+                    {typeof values.coins === "number"
+                      ? values.coins > 0
+                        ? `+${values.coins}`
+                        : values.coins
+                      : values.coins}
                     <span className="inline-block size-3 rounded-full border border-yellow-400 bg-orange-400" />
                   </strong>
                 </div>
@@ -172,7 +211,13 @@ export default function HistoryTab({ matches, users, currentUserId }: HistoryTab
                 />
                 <DetailItem
                   label="Moedas"
-                  value={selectedValues.coins > 0 ? `+${selectedValues.coins}` : String(selectedValues.coins)}
+                  value={
+                    typeof selectedValues.coins === "number"
+                      ? selectedValues.coins > 0
+                        ? `+${selectedValues.coins}`
+                        : String(selectedValues.coins)
+                      : selectedValues.coins
+                  }
                 />
               </div>
 

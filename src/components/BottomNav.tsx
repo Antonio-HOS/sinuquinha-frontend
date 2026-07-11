@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type BottomNavProps = {
-  active?: "home" | "trophy" | "profile";
+  active?: "home" | "trophy" | "history" | "profile";
 };
 
 const iconClass = (active: boolean) =>
@@ -34,6 +34,14 @@ export default function BottomNav({ active = "home" }: BottomNavProps) {
         <TrophyIcon />
       </Link>
       <Link
+        href="/historico"
+        className={`flex flex-1 justify-center ${iconClass(active === "history")}`}
+        aria-label="Histórico de partidas"
+        aria-current={active === "history" ? "page" : undefined}
+      >
+        <HistoryIcon />
+      </Link>
+      <Link
         href="/profile"
         className={`flex flex-1 justify-center ${iconClass(active === "profile")}`}
         aria-label="Perfil"
@@ -58,6 +66,17 @@ function TrophyIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM5 4H3v2a4 4 0 0 0 4 4M19 4h2v2a4 4 0 0 1-4 4" />
+    </svg>
+  );
+}
+
+function HistoryIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M8 6h13M8 12h13M8 18h13" />
+      <circle cx="4" cy="6" r="1" fill="currentColor" stroke="none" />
+      <circle cx="4" cy="12" r="1" fill="currentColor" stroke="none" />
+      <circle cx="4" cy="18" r="1" fill="currentColor" stroke="none" />
     </svg>
   );
 }
