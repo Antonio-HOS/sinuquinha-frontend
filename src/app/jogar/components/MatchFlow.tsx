@@ -180,7 +180,6 @@ type BetCardProps = {
   value: number;
   opponent?: string;
   gameType?: string;
-  bestOf?: number;
   compact?: boolean;
 };
 
@@ -188,7 +187,6 @@ export function BetCard({
   value,
   opponent = "codigo",
   gameType = "Bola 8",
-  bestOf = 3,
   compact = false,
 }: BetCardProps) {
   return (
@@ -212,10 +210,6 @@ export function BetCard({
         <p>
           <span className={`${gajrajOne.className}`}>Tipo de jogo:</span>{" "}
           <span className={compact ? "text-base" : "text-xl"}>{gameType}</span>
-        </p>
-        <p>
-          <span className={`${gajrajOne.className}`}>melhor de:</span>{" "}
-          <span className={compact ? "text-base" : "text-xl"}>{bestOf}</span>
         </p>
       </div>
     </section>

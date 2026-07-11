@@ -7,12 +7,17 @@ import {
   MatchTitle,
 } from "@/src/app/jogar/components/MatchFlow";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
-import { api, formatMatchDuration, isProjectedWinner, type Match, type User } from "@/src/lib/api";
+import {
+  api,
+  formatMatchDuration,
+  getProjectedWinnerUserIds,
+  type Match,
+  type User,
+} from "@/src/lib/api";
 import { useSocket } from "@/src/providers/SocketProvider";
 import { gajrajOne } from "@/src/fonts";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 function ActiveMatchContent() {
   const router = useRouter();
@@ -24,9 +29,6 @@ function ActiveMatchContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -39,7 +41,10 @@ function ActiveMatchContent() {
         ]);
         setMatch(matchResponse);
         setUsers(usersResponse);
-        if (matchResponse.status === "finished") {
+        if (
+          matchResponse.status === "finished" ||
+          matchResponse.status === "waiting_photo"
+        ) {
           router.push(`/jogar/fim?matchId=${matchResponse.id}`);
         }
       } catch (err) {
@@ -62,6 +67,12 @@ function ActiveMatchContent() {
       setMatch(response);
     };
 
+    const handleConcluded = (response: Match) => {
+      if (response.id !== matchId) return;
+      setMatch(response);
+      router.push(`/jogar/fim?matchId=${response.id}`);
+    };
+
     const handleFinished = (response: Match) => {
       if (response.id !== matchId) return;
       setMatch(response);
@@ -71,6 +82,7 @@ function ActiveMatchContent() {
     socket.on("match:state", handleMatchUpdate);
     socket.on("match:updated", handleMatchUpdate);
     socket.on("match:score:updated", handleMatchUpdate);
+    socket.on("match:concluded", handleConcluded);
     socket.on("match:finished", handleFinished);
     socket.on("match:started", handleMatchUpdate);
 
@@ -78,6 +90,7 @@ function ActiveMatchContent() {
       socket.off("match:state", handleMatchUpdate);
       socket.off("match:updated", handleMatchUpdate);
       socket.off("match:score:updated", handleMatchUpdate);
+      socket.off("match:concluded", handleConcluded);
       socket.off("match:finished", handleFinished);
       socket.off("match:started", handleMatchUpdate);
     };
@@ -101,11 +114,11 @@ function ActiveMatchContent() {
   const currentPlayer = match?.players?.find(
     (player) => player.user_id === user?.id,
   );
-  const canFinishAsWinner = Boolean(
+  const canConcludeMatch = Boolean(
     match &&
       user?.id &&
       match.status === "active" &&
-      isProjectedWinner(match, user.id),
+      getProjectedWinnerUserIds(match),
   );
   const scoreEntries = useMemo(() => {
     const players = match?.players ?? [];
@@ -163,35 +176,13 @@ function ActiveMatchContent() {
     );
   };
 
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    setError("");
-
-    if (!file) {
-      setSelectedPhoto(null);
-      setPhotoPreview(null);
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setError("Selecione um arquivo de imagem.");
-      return;
-    }
-
-    setSelectedPhoto(file);
-    setPhotoPreview(URL.createObjectURL(file));
-  };
-
-  const handleFinish = async () => {
-    if (!matchId || !selectedPhoto) {
-      setError("Anexe uma foto da partida para finalizar.");
-      return;
-    }
+  const handleConclude = async () => {
+    if (!matchId) return;
 
     try {
       setIsSubmitting(true);
       setError("");
-      const response = await api.finishMatchWithPhoto(matchId, selectedPhoto);
+      const response = await api.concludeMatch(matchId);
       setMatch(response);
       router.push(`/jogar/fim?matchId=${response.id}`);
     } catch (err) {
@@ -201,20 +192,12 @@ function ActiveMatchContent() {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (photoPreview) {
-        URL.revokeObjectURL(photoPreview);
-      }
-    };
-  }, [photoPreview]);
-
   return (
     <MatchShell exitButton={false}>
       <div className="scrollbar-hidden mx-auto flex max-h-[calc(100vh-140px)] min-h-0 w-full max-w-[344px] flex-1 flex-col overflow-y-auto">
         <MatchTitle
           title="Partida"
-          subtitle={`${match?.game_type ?? "-"} | Melhor de ${match?.best_of ?? "-"}`}
+          subtitle={match?.game_type ?? "-"}
           className="px-0 text-center"
         />
 
@@ -295,49 +278,18 @@ function ActiveMatchContent() {
             </button>
           ) : match?.status === "active" ? (
             <div className="flex w-full max-w-[320px] flex-col items-center gap-3">
-              {canFinishAsWinner ? (
-                <>
-                  <p className="text-center text-xs text-white/70">
-                    Como vencedor, anexe uma foto da partida para finalizar.
-                  </p>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={handlePhotoChange}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => photoInputRef.current?.click()}
-                    className="w-full rounded-md border border-white/20 bg-black/20 px-4 py-3 text-sm text-white/85 transition-colors hover:border-[#FFD700]/50"
-                  >
-                    {selectedPhoto ? "Trocar foto" : "Anexar foto da partida"}
-                  </button>
-                  {photoPreview ? (
-                    <div className="relative h-40 w-full overflow-hidden rounded-md border border-[#FFD700]/40">
-                      <Image
-                        src={photoPreview}
-                        alt="Prévia da foto da partida"
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={handleFinish}
-                    disabled={isSubmitting || !selectedPhoto}
-                    className={`${gajrajOne.className} flex h-12 w-full items-center justify-center rounded-md border border-[#2AC054] px-8 text-[1.65rem] leading-none text-[#2AC054] transition-colors hover:bg-[#2AC054] hover:text-[#004C55] disabled:opacity-50`}
-                  >
-                    {isSubmitting ? "Finalizando..." : "Finalizar"}
-                  </button>
-                </>
+              {canConcludeMatch ? (
+                <button
+                  type="button"
+                  onClick={handleConclude}
+                  disabled={isSubmitting}
+                  className={`${gajrajOne.className} flex h-12 w-full items-center justify-center rounded-md border border-[#2AC054] px-8 text-[1.65rem] leading-none text-[#2AC054] transition-colors hover:bg-[#2AC054] hover:text-[#004C55] disabled:opacity-50`}
+                >
+                  {isSubmitting ? "Finalizando..." : "Finalizar partida"}
+                </button>
               ) : (
                 <p className="text-center text-xs text-white/70">
-                  Aguardando o vencedor enviar a foto da partida para finalizar.
+                  Defina um vencedor no placar para finalizar a partida.
                 </p>
               )}
             </div>

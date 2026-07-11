@@ -15,7 +15,6 @@ import { Suspense, useState } from "react";
 const minStakeCoins = 45;
 const coinOptions = [45, 60, 70, 100];
 const gameTypes = ["Mata Mata", "Bola 8", "Brasileirinha"];
-const bestOfOptions = [3, 5, 7];
 
 function normalizeMode(mode: string) {
   return mode === "Todos Contra" ? "Todos Contra (3)" : mode;
@@ -74,7 +73,6 @@ function MatchCoinsContent() {
     "oponente";
   const [stakeCoins, setStakeCoins] = useState(minStakeCoins);
   const [gameType, setGameType] = useState("Bola 8");
-  const [bestOf, setBestOf] = useState(3);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -103,7 +101,6 @@ function MatchCoinsContent() {
         players,
         mode: normalizeMode(mode),
         gameType,
-        bestOf,
         stakeCoins,
       });
       router.push(`/jogar/partida?matchId=${match.id}`);
@@ -169,28 +166,6 @@ function MatchCoinsContent() {
                 }`}
               >
                 {type}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-5 px-1">
-          <h2 className={`${gajrajOne.className} text-base text-[#FFEDAD]`}>
-            Melhor de:
-          </h2>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {bestOfOptions.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setBestOf(option)}
-                className={`flex h-11 items-center justify-center rounded border px-2 text-sm tracking-[0.08em] shadow-[0_4px_4px_rgba(0,0,0,0.25)] transition-colors ${
-                  bestOf === option
-                    ? "border-[#FFD700] text-[#FFD700]"
-                    : "border-white/80 text-[#FFEDAD] hover:border-[#FFD700] hover:text-[#FFD700]"
-                }`}
-              >
-                {option}
               </button>
             ))}
           </div>

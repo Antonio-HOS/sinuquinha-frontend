@@ -159,8 +159,8 @@ function MatchInviteModal() {
       <section className="w-full max-w-[320px] rounded-2xl border border-[#FFD700] bg-[#004C55] p-5 text-center shadow-2xl">
         <h2 className="text-2xl text-[#FFD700]">Convite de Partida</h2>
         <p className="mt-3 text-sm text-[#FFEDAD]">
-          Você recebeu um convite para jogar {activeInvite.game_type}, melhor de{" "}
-          {activeInvite.best_of}, valendo {activeInvite.stake_coins} moedas.
+          Você recebeu um convite para jogar {activeInvite.game_type}, valendo{" "}
+          {activeInvite.stake_coins} moedas.
         </p>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button

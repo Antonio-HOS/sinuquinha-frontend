@@ -1,6 +1,6 @@
 import { gajrajOne } from "@/src/fonts";
 import RankPoints from "@/src/components/RankPoints";
-import { formatMatchDuration, getMatchPhotoUrl, type Match, type User } from "@/src/lib/api";
+import { formatMatchDuration, getMatchPhotoUrl, getWinnerCoinPayout, type Match, type User } from "@/src/lib/api";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Image from "next/image";
@@ -21,17 +21,16 @@ function getHistoryValues(
     ? match.players?.find((player) => player.user_id === currentUserId)
     : undefined;
   const participated = Boolean(currentPlayer);
-  const winnerCount =
-    match.players?.filter((player) => player.result === "winner").length ?? 1;
   const isWinner = currentPlayer?.result === "winner";
+  const isWaitingPhoto = match.status === "waiting_photo";
   const isFinished = match.status === "finished";
-  const totalReward = match.stake_coins * (match.players?.length ?? 0);
+  const isConcluded = isFinished || isWaitingPhoto;
   const winnerPlayer = match.players?.find((player) => player.result === "winner");
   const winnerName = winnerPlayer
     ? userById?.get(winnerPlayer.user_id)?.nickname ??
       winnerPlayer.user_id.slice(0, 8)
     : null;
-  const points = !isFinished || !currentPlayer
+  const points = !isConcluded || !currentPlayer
     ? "-"
     : isWinner
       ? match.mode === "Todos Contra (3)"
@@ -40,24 +39,33 @@ function getHistoryValues(
       : "-30";
   const coins = !currentPlayer
     ? "-"
-    : !isFinished
+    : !isConcluded
       ? match.stake_coins
       : isWinner
-        ? Math.floor(totalReward / Math.max(winnerCount, 1))
+        ? getWinnerCoinPayout(match, currentUserId)
         : -match.stake_coins;
 
   return {
-    result: !isFinished
+    result: !isConcluded
       ? match.status
-      : participated
-        ? isWinner
-          ? "Vitória"
-          : "Derrota"
-        : winnerName
-          ? `Vencedor: ${winnerName}`
-          : "Finalizada",
+      : isWaitingPhoto
+        ? participated
+          ? isWinner
+            ? "Vitória (aguardando foto)"
+            : "Derrota (aguardando foto)"
+          : winnerName
+            ? `Vencedor: ${winnerName}`
+            : "Aguardando foto"
+        : participated
+          ? isWinner
+            ? "Vitória"
+            : "Derrota"
+          : winnerName
+            ? `Vencedor: ${winnerName}`
+            : "Finalizada",
     isWinner,
     isFinished,
+    isWaitingPhoto,
     participated,
     duration: formatMatchDuration(match),
     points,
@@ -117,7 +125,13 @@ export default function HistoryTab({
                 ? "border-[#2AC054]/50 bg-[#2AC054]/15 text-[#2AC054]"
                 : "border-red-300/50 bg-red-500/10 text-red-200"
               : "border-[#7DD3FC]/50 bg-sky-500/10 text-sky-100"
-            : "border-[#FFD700]/40 bg-[#FFD700]/10 text-[#FFD700]";
+            : values.isWaitingPhoto
+              ? values.participated
+                ? values.isWinner
+                  ? "border-[#2AC054]/40 bg-[#2AC054]/10 text-[#2AC054]"
+                  : "border-red-300/40 bg-red-500/10 text-red-200"
+                : "border-[#FFD700]/40 bg-[#FFD700]/10 text-[#FFD700]"
+              : "border-[#FFD700]/40 bg-[#FFD700]/10 text-[#FFD700]";
 
           return (
             <button
@@ -230,7 +244,6 @@ export default function HistoryTab({
                 <DetailItem label="Modo" value={selectedMatch.mode} />
                 <DetailItem label="Resultado" value={selectedValues.result} />
                 <DetailItem label="Tempo" value={selectedValues.duration} />
-                <DetailItem label="Melhor de" value={String(selectedMatch.best_of)} />
                 <DetailItem label="Início" value={formatDateTime(selectedMatch.started_at)} />
                 <DetailItem label="Fim" value={formatDateTime(selectedMatch.ended_at)} />
                 <DetailItem

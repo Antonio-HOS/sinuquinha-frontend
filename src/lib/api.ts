@@ -58,6 +58,29 @@ export type CoinPackage = {
   is_active: boolean;
 };
 
+export type PurchasePayment = {
+  orderId: string;
+  qrCodeText: string;
+  qrCodePngUrl?: string;
+  expiresAt: string;
+};
+
+export type Purchase = {
+  id: string;
+  user_id: string;
+  coin_package_id: string;
+  coins: number;
+  bonus_coins: number;
+  amount_cents: number;
+  currency: string;
+  status: "pending" | "paid" | "failed" | "refunded" | "cancelled";
+  payment_provider?: string | null;
+  provider_reference?: string | null;
+  payment?: PurchasePayment | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type MatchPlayer = {
   id: string;
   match_id: string;
@@ -77,11 +100,11 @@ export type Match = {
   id: string;
   mode: string;
   game_type: string;
-  best_of: number;
   status:
     | "draft"
     | "waiting_confirmation"
     | "active"
+    | "waiting_photo"
     | "finished"
     | "cancelled"
     | "revoked";
@@ -135,6 +158,52 @@ export function clearAccessToken() {
 }
 
 export const DEFAULT_MATCH_PHOTO = "/sinuca.svg";
+export const WINNER_POT_SHARE = 0.8;
+
+export function getMatchPot(match?: Pick<Match, "stake_coins" | "players"> | null) {
+  return (match?.stake_coins ?? 0) * (match?.players?.length ?? 0);
+}
+
+export function getWinnerCoinPayouts(
+  stakeCoins: number,
+  playerCount: number,
+  winnerUserIds: string[],
+) {
+  const pot = stakeCoins * playerCount;
+  const distributablePot = Math.floor(pot * WINNER_POT_SHARE);
+  const winnerCount = Math.max(winnerUserIds.length, 1);
+  const basePayout = Math.floor(distributablePot / winnerCount);
+  const remainder = distributablePot % winnerCount;
+
+  return Object.fromEntries(
+    winnerUserIds.map((userId, index) => [
+      userId,
+      basePayout + (index === 0 ? remainder : 0),
+    ]),
+  );
+}
+
+export function getWinnerCoinPayout(match: Match, userId?: string) {
+  const winnerUserIds =
+    match.players?.filter((player) => player.result === "winner").map((player) => player.user_id) ??
+    [];
+
+  if (!winnerUserIds.length) {
+    return Math.floor(getMatchPot(match) * WINNER_POT_SHARE);
+  }
+
+  const payouts = getWinnerCoinPayouts(
+    match.stake_coins ?? 0,
+    match.players?.length ?? 0,
+    winnerUserIds,
+  );
+
+  if (userId && payouts[userId] !== undefined) {
+    return payouts[userId];
+  }
+
+  return payouts[winnerUserIds[0]] ?? 0;
+}
 
 export function getMatchPhotoUrl(match?: Pick<Match, "file"> | null) {
   if (match?.file) {
@@ -262,16 +331,13 @@ export const api = {
   statsMe: () => apiRequest<UserStats>("/stats/me"),
   statsUser: (userId: string) => apiRequest<UserStats>(`/stats/users/${userId}`),
   coinPackages: () => apiRequest<CoinPackage[]>("/coins/packages"),
-  createPurchase: (coinPackageId: string) =>
-    apiRequest<{ id: string }>("/purchases", {
+  createPurchase: (coinPackageId: string, taxId: string) =>
+    apiRequest<Purchase>("/purchases", {
       method: "POST",
-      body: JSON.stringify({ coinPackageId, paymentProvider: "manual" }),
+      body: JSON.stringify({ coinPackageId, taxId: taxId.replace(/\D/g, "") }),
     }),
-  confirmPurchase: (purchaseId: string) =>
-    apiRequest<unknown>(`/purchases/${purchaseId}/confirm-payment`, {
-      method: "POST",
-      body: JSON.stringify({ providerReference: `front-${Date.now()}` }),
-    }),
+  getPurchase: (purchaseId: string) =>
+    apiRequest<Purchase>(`/purchases/${purchaseId}`),
   matches: (status = "") =>
     apiRequest<Match[]>(
       status ? `/matches?status=${encodeURIComponent(status)}` : "/matches",
@@ -291,7 +357,6 @@ export const api = {
     players: MatchParticipantInput[];
     mode: string;
     gameType: string;
-    bestOf: number;
     stakeCoins: number;
   }) =>
     apiRequest<Match>("/matches", {
@@ -307,6 +372,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ roundNumber, winnerUserId }),
     }),
+  concludeMatch: (matchId: string) =>
+    apiRequest<Match>(`/matches/${matchId}/conclude`, { method: "POST" }),
   finishMatchWithPhoto: (matchId: string, file: File) => {
     const formData = new FormData();
     formData.append("file", file);

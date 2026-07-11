@@ -4,6 +4,7 @@ import { gajrajOne } from "@/src/fonts";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
 import { api } from "@/src/lib/api";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -38,6 +39,7 @@ type DailyCoinsModalProps = {
   error: string;
   onCollect: () => void;
   onClose: () => void;
+  buyHref: string;
 };
 
 function DailyCoinsModal({
@@ -47,6 +49,7 @@ function DailyCoinsModal({
   error,
   onCollect,
   onClose,
+  buyHref,
 }: DailyCoinsModalProps) {
   return (
     <main
@@ -142,6 +145,13 @@ function DailyCoinsModal({
               {error}
             </p>
           ) : null}
+
+          <Link
+            href={buyHref}
+            className={`${gajrajOne.className} mx-auto mt-4 flex h-[46px] w-full max-w-[222px] items-center justify-center rounded-[9px] border-2 border-[#004C55] bg-[#004C55] text-[0.95rem] leading-none tracking-[0.18em] text-[#FFC400] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition hover:bg-[#003840] active:scale-[0.98]`}
+          >
+            COMPRAR MOEDAS
+          </Link>
         </div>
       </section>
     </main>
@@ -225,6 +235,7 @@ export default function FabcoinsPage() {
       error={error}
       onCollect={handleCollect}
       onClose={handleClose}
+      buyHref="/moedas/comprar"
     />
   );
 }

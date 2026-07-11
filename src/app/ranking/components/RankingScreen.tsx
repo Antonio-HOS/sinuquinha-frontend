@@ -6,9 +6,9 @@ import BottomNav from "@/src/components/BottomNav";
 import RankPoints from "@/src/components/RankPoints";
 import { api, type RankingEntry } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
-import { ChevronLeft, ChevronRight, Gem, Medal, Shield, Sparkles, Trophy } from "lucide-react";
+import { Gem, Medal, Shield, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 
 type League = "geral" | "bronze" | "prata" | "ouro" | "diamante";
 type RankedLeague = Exclude<League, "geral">;
@@ -53,7 +53,13 @@ type RankingScreenProps = {
 export default function RankingScreen({ league = "geral" }: RankingScreenProps) {
   const [players, setPlayers] = useState<RankingEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const leagueNavRef = useRef<HTMLDivElement>(null);
+  const leagueNavRef = useRef<HTMLElement>(null);
+  const leagueDragRef = useRef({
+    isDragging: false,
+    startX: 0,
+    scrollLeft: 0,
+    hasDragged: false,
+  });
 
   useEffect(() => {
     async function loadRanking() {
@@ -81,11 +87,48 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
           );
         });
 
-  const scrollLeagues = (direction: "left" | "right") => {
-    leagueNavRef.current?.scrollBy({
-      left: direction === "left" ? -120 : 120,
-      behavior: "smooth",
-    });
+  const handleLeaguePointerDown = (event: PointerEvent<HTMLElement>) => {
+    const nav = leagueNavRef.current;
+    if (!nav || event.button !== 0) return;
+
+    leagueDragRef.current = {
+      isDragging: true,
+      startX: event.clientX,
+      scrollLeft: nav.scrollLeft,
+      hasDragged: false,
+    };
+    nav.setPointerCapture(event.pointerId);
+  };
+
+  const handleLeaguePointerMove = (event: PointerEvent<HTMLElement>) => {
+    const nav = leagueNavRef.current;
+    const drag = leagueDragRef.current;
+    if (!nav || !drag.isDragging) return;
+
+    event.preventDefault();
+    const walk = event.clientX - drag.startX;
+    if (Math.abs(walk) > 5) {
+      drag.hasDragged = true;
+    }
+    nav.scrollLeft = drag.scrollLeft - walk;
+  };
+
+  const endLeagueDrag = (event: PointerEvent<HTMLElement>) => {
+    const nav = leagueNavRef.current;
+    if (!nav) return;
+
+    leagueDragRef.current.isDragging = false;
+    if (nav.hasPointerCapture(event.pointerId)) {
+      nav.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handleLeagueNavClick = (event: MouseEvent<HTMLElement>) => {
+    if (leagueDragRef.current.hasDragged) {
+      event.preventDefault();
+      event.stopPropagation();
+      leagueDragRef.current.hasDragged = false;
+    }
   };
 
   return (
@@ -101,19 +144,16 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
         </p>
       </section>
 
-      <div className="mt-5 grid grid-cols-[2.25rem_1fr_2.25rem] items-center gap-2 -mx-4 ">
-        <button
-          type="button"
-          onClick={() => scrollLeagues("left")}
-          className="flex size-9 items-center justify-center rounded-full border border-[#FFD700]/50 bg-white/10 text-[#FFD700] transition-colors hover:bg-[#FFD700] hover:text-black"
-          aria-label="Ver ligas anteriores"
-        >
-          <ChevronLeft className="size-5" />
-        </button>
-
+      <div className="-mx-4 mt-5">
         <nav
           ref={leagueNavRef}
-          className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1"
+          className="scrollbar-hidden flex cursor-grab gap-2 overflow-x-auto pb-1 select-none active:cursor-grabbing"
+          style={{ touchAction: "pan-x" }}
+          onPointerDown={handleLeaguePointerDown}
+          onPointerMove={handleLeaguePointerMove}
+          onPointerUp={endLeagueDrag}
+          onPointerCancel={endLeagueDrag}
+          onClickCapture={handleLeagueNavClick}
         >
           {leagueOrder.map((item) => {
             const Icon = leagueIcons[item];
@@ -123,6 +163,7 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
               <Link
                 key={item}
                 href={item === "geral" ? "/ranking" : `/ranking/${item}`}
+                draggable={false}
                 className={`${gajrajOne.className} flex min-w-[72px] shrink-0 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-center text-[9px] leading-none transition-colors ${
                   isActive
                     ? `${leagueStyles[item]} bg-white/10 shadow-[0_0_16px_rgba(255,215,0,0.12)]`
@@ -135,15 +176,6 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
             );
           })}
         </nav>
-
-        <button
-          type="button"
-          onClick={() => scrollLeagues("right")}
-          className="flex size-9 items-center justify-center rounded-full border border-[#FFD700]/50 bg-white/10 text-[#FFD700] transition-colors hover:bg-[#FFD700] hover:text-black"
-          aria-label="Ver próximas ligas"
-        >
-          <ChevronRight className="size-5" />
-        </button>
       </div>
 
       <section className="scrollbar-hidden mt-6 flex flex-1 flex-col gap-3 overflow-y-auto pb-6">

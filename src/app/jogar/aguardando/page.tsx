@@ -90,7 +90,6 @@ function WaitingOpponentContent() {
             value={match?.stake_coins ?? 0}
             opponent="Oponente"
             gameType={match?.game_type ?? "-"}
-            bestOf={match?.best_of ?? 3}
             compact
           />
         </div>
