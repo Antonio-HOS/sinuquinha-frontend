@@ -7,11 +7,12 @@ import {
   MatchTitle,
 } from "@/src/app/jogar/components/MatchFlow";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
-import { api, formatMatchDuration, type Match, type User } from "@/src/lib/api";
+import { api, formatMatchDuration, isProjectedWinner, type Match, type User } from "@/src/lib/api";
 import { useSocket } from "@/src/providers/SocketProvider";
 import { gajrajOne } from "@/src/fonts";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 function ActiveMatchContent() {
   const router = useRouter();
@@ -23,6 +24,9 @@ function ActiveMatchContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -97,6 +101,12 @@ function ActiveMatchContent() {
   const currentPlayer = match?.players?.find(
     (player) => player.user_id === user?.id,
   );
+  const canFinishAsWinner = Boolean(
+    match &&
+      user?.id &&
+      match.status === "active" &&
+      isProjectedWinner(match, user.id),
+  );
   const scoreEntries = useMemo(() => {
     const players = match?.players ?? [];
 
@@ -153,15 +163,51 @@ function ActiveMatchContent() {
     );
   };
 
-  const handleFinish = () => {
-    if (!socket || !matchId) return;
-    setIsSubmitting(true);
-    socket.emit("match:finish", { matchId }, (response: Match) => {
-      setIsSubmitting(false);
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setError("");
+
+    if (!file) {
+      setSelectedPhoto(null);
+      setPhotoPreview(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Selecione um arquivo de imagem.");
+      return;
+    }
+
+    setSelectedPhoto(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleFinish = async () => {
+    if (!matchId || !selectedPhoto) {
+      setError("Anexe uma foto da partida para finalizar.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError("");
+      const response = await api.finishMatchWithPhoto(matchId, selectedPhoto);
       setMatch(response);
       router.push(`/jogar/fim?matchId=${response.id}`);
-    });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível finalizar.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
 
   return (
     <MatchShell exitButton={false}>
@@ -247,19 +293,59 @@ function ActiveMatchContent() {
             >
               {isSubmitting ? "Confirmando..." : "Confirmar"}
             </button>
+          ) : match?.status === "active" ? (
+            <div className="flex w-full max-w-[320px] flex-col items-center gap-3">
+              {canFinishAsWinner ? (
+                <>
+                  <p className="text-center text-xs text-white/70">
+                    Como vencedor, anexe uma foto da partida para finalizar.
+                  </p>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="w-full rounded-md border border-white/20 bg-black/20 px-4 py-3 text-sm text-white/85 transition-colors hover:border-[#FFD700]/50"
+                  >
+                    {selectedPhoto ? "Trocar foto" : "Anexar foto da partida"}
+                  </button>
+                  {photoPreview ? (
+                    <div className="relative h-40 w-full overflow-hidden rounded-md border border-[#FFD700]/40">
+                      <Image
+                        src={photoPreview}
+                        alt="Prévia da foto da partida"
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={handleFinish}
+                    disabled={isSubmitting || !selectedPhoto}
+                    className={`${gajrajOne.className} flex h-12 w-full items-center justify-center rounded-md border border-[#2AC054] px-8 text-[1.65rem] leading-none text-[#2AC054] transition-colors hover:bg-[#2AC054] hover:text-[#004C55] disabled:opacity-50`}
+                  >
+                    {isSubmitting ? "Finalizando..." : "Finalizar"}
+                  </button>
+                </>
+              ) : (
+                <p className="text-center text-xs text-white/70">
+                  Aguardando o vencedor enviar a foto da partida para finalizar.
+                </p>
+              )}
+            </div>
           ) : (
             <div className="flex flex-col items-center gap-3">
               <p className="text-center text-xs text-white/70">
                 Participantes podem alterar o placar em tempo real.
               </p>
-              <button
-                type="button"
-                onClick={handleFinish}
-                disabled={isSubmitting || match?.status !== "active"}
-                className={`${gajrajOne.className} flex h-12 items-center justify-center rounded-md border border-[#2AC054] px-8 text-[1.65rem] leading-none text-[#2AC054] transition-colors hover:bg-[#2AC054] hover:text-[#004C55] disabled:opacity-50`}
-              >
-                {isSubmitting ? "Finalizando..." : "Finalizar"}
-              </button>
             </div>
           )}
         </div>

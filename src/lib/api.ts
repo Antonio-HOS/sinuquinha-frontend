@@ -88,6 +88,7 @@ export type Match = {
   created_by_user_id: string;
   winner_user_id?: string | null;
   stake_coins: number;
+  file?: string | null;
   started_at?: string | null;
   ended_at?: string | null;
   players?: MatchPlayer[];
@@ -133,6 +134,58 @@ export function clearAccessToken() {
   window.dispatchEvent(new Event("sinuquinha:auth-changed"));
 }
 
+export const DEFAULT_MATCH_PHOTO = "/sinuca.svg";
+
+export function getMatchPhotoUrl(match?: Pick<Match, "file"> | null) {
+  if (match?.file) {
+    return match.file.startsWith("http") ? match.file : `${API_URL}${match.file}`;
+  }
+
+  return DEFAULT_MATCH_PHOTO;
+}
+
+export function getProjectedWinnerUserIds(match: Match): string[] | null {
+  const players = match.players ?? [];
+
+  if (match.mode === "2x2") {
+    const teamScores = ["A", "B"].map((team) => ({
+      team,
+      score: Math.max(
+        0,
+        ...players
+          .filter((player) => player.team === team)
+          .map((player) => Number(player.score)),
+      ),
+    }));
+    teamScores.sort((a, b) => b.score - a.score);
+
+    if (!teamScores[0] || teamScores[0].score === teamScores[1]?.score) {
+      return null;
+    }
+
+    return players
+      .filter((player) => player.team === teamScores[0].team)
+      .map((player) => player.user_id);
+  }
+
+  const sortedPlayers = [...players].sort(
+    (a, b) => Number(b.score) - Number(a.score),
+  );
+  const winner = sortedPlayers[0];
+  const runnerUp = sortedPlayers[1];
+
+  if (!winner || Number(winner.score) === Number(runnerUp?.score ?? -1)) {
+    return null;
+  }
+
+  return [winner.user_id];
+}
+
+export function isProjectedWinner(match: Match, userId: string) {
+  const winnerUserIds = getProjectedWinnerUserIds(match);
+  return Boolean(winnerUserIds?.includes(userId));
+}
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
@@ -140,7 +193,11 @@ export async function apiRequest<T>(
   const token = getAccessToken();
   const headers = new Headers(options.headers);
 
-  if (!headers.has("Content-Type") && options.body) {
+  if (
+    !headers.has("Content-Type") &&
+    options.body &&
+    !(options.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -250,8 +307,15 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ roundNumber, winnerUserId }),
     }),
-  finishMatch: (matchId: string) =>
-    apiRequest<Match>(`/matches/${matchId}/finish`, { method: "POST" }),
+  finishMatchWithPhoto: (matchId: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiRequest<Match>(`/matches/${matchId}/finish`, {
+      method: "POST",
+      body: formData,
+    });
+  },
   notifications: () => apiRequest<Notification[]>("/notifications"),
 };
 

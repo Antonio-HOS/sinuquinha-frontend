@@ -8,8 +8,9 @@ import AppHeader from "@/src/components/AppHeader";
 import Avatar from "@/src/components/Avatar";
 import BottomNav from "@/src/components/BottomNav";
 import { useCurrentUser } from "@/src/hooks/useCurrentUser";
-import { api, formatMatchDuration, type Match, type User } from "@/src/lib/api";
+import { api, formatMatchDuration, getMatchPhotoUrl, type Match, type User } from "@/src/lib/api";
 import { gajrajOne } from "@/src/fonts";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
@@ -96,7 +97,17 @@ function MatchEndContent() {
             </div>
           </section>
 
-          <section className="mt-4 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3">
+          <section className="mt-4 w-full overflow-hidden rounded-xl border border-white/15 bg-white/10">
+            <div className="relative h-44 w-full bg-black/20">
+              <Image
+                src={getMatchPhotoUrl(match)}
+                alt="Foto da partida"
+                fill
+                className="object-cover"
+                unoptimized={Boolean(match?.file)}
+              />
+            </div>
+            <div className="px-4 py-3">
             <p className={`${gajrajOne.className} text-center text-xl text-white/90`}>
               Fim de Jogo
             </p>
@@ -107,6 +118,7 @@ function MatchEndContent() {
               <span className={`${gajrajOne.className} text-lg text-white`}>
                 {formatMatchDuration(match)}
               </span>
+            </div>
             </div>
           </section>
 

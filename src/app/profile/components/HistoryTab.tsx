@@ -1,8 +1,9 @@
 import { gajrajOne } from "@/src/fonts";
 import RankPoints from "@/src/components/RankPoints";
-import { formatMatchDuration, type Match, type User } from "@/src/lib/api";
+import { formatMatchDuration, getMatchPhotoUrl, type Match, type User } from "@/src/lib/api";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import Image from "next/image";
 
 type HistoryTabProps = {
   matches: Match[];
@@ -125,6 +126,19 @@ export default function HistoryTab({
               onClick={() => setSelectedMatch(item)}
               className="rounded-xl border border-white/15 bg-white/10 px-3 py-3 text-left text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition-colors hover:border-[#FFD700]/50 hover:bg-white/15"
             >
+              <div className="flex items-start gap-3">
+                {item.file ? (
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-black/20">
+                    <Image
+                      src={getMatchPhotoUrl(item)}
+                      alt={`Foto da partida ${item.game_type}`}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
+                <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className={`${gajrajOne.className} truncate text-base leading-none tracking-[0.08em] text-[#FFD700]`}>
@@ -165,6 +179,8 @@ export default function HistoryTab({
                   </strong>
                 </div>
               </div>
+                </div>
+              </div>
             </button>
           );
         })}
@@ -198,7 +214,19 @@ export default function HistoryTab({
             </div>
 
             <div className="scrollbar-hidden min-h-0 overflow-y-auto px-4 py-4">
-              <div className="grid grid-cols-2 gap-2">
+              {selectedMatch.file ? (
+                <div className="relative h-48 w-full overflow-hidden rounded-xl border border-white/15 bg-black/20">
+                  <Image
+                    src={getMatchPhotoUrl(selectedMatch)}
+                    alt={`Foto da partida ${selectedMatch.game_type}`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              ) : null}
+
+              <div className={`grid grid-cols-2 gap-2 ${selectedMatch.file ? "mt-4" : ""}`}>
                 <DetailItem label="Modo" value={selectedMatch.mode} />
                 <DetailItem label="Resultado" value={selectedValues.result} />
                 <DetailItem label="Tempo" value={selectedValues.duration} />
