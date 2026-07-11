@@ -189,6 +189,7 @@ export const api = {
       body: JSON.stringify(input),
     }),
   me: () => apiRequest<User>("/users/me"),
+  user: (userId: string) => apiRequest<User>(`/users/${userId}`),
   updateMe: (input: Partial<Pick<User, "name" | "nickname">> & { avatarId?: string }) =>
     apiRequest<User>("/users/me", {
       method: "PATCH",
@@ -202,6 +203,7 @@ export const api = {
       "/rankings/current",
     ),
   statsMe: () => apiRequest<UserStats>("/stats/me"),
+  statsUser: (userId: string) => apiRequest<UserStats>(`/stats/users/${userId}`),
   coinPackages: () => apiRequest<CoinPackage[]>("/coins/packages"),
   createPurchase: (coinPackageId: string) =>
     apiRequest<{ id: string }>("/purchases", {
@@ -216,6 +218,12 @@ export const api = {
   matches: (status = "") =>
     apiRequest<Match[]>(
       status ? `/matches?status=${encodeURIComponent(status)}` : "/matches",
+    ),
+  matchesByUser: (userId: string, status = "") =>
+    apiRequest<Match[]>(
+      status
+        ? `/matches/users/${userId}?status=${encodeURIComponent(status)}`
+        : `/matches/users/${userId}`,
     ),
   match: (matchId: string) => apiRequest<Match>(`/matches/${matchId}`),
   createMatch: (input: {

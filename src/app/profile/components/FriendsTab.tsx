@@ -63,7 +63,10 @@ export default function FriendsTab({ users, currentUserId }: FriendsTabProps) {
                 key={item.id}
                 className="border border-white/60 rounded-xl p-4 flex justify-between items-center bg-transparent"
               >
-                <div className="flex flex-col">
+                <Link
+                  href={`/profile/${item.id}`}
+                  className="flex min-w-0 flex-1 flex-col"
+                >
                   <span className={`${gajrajOne.className} text-white text-sm sm:text-base`}>
                     {item.nickname}
                   </span>
@@ -74,10 +77,10 @@ export default function FriendsTab({ users, currentUserId }: FriendsTabProps) {
                     Rank:
                     <RankPoints value={item.rank_points} starClassName="size-3" />
                   </span>
-                </div>
+                </Link>
                 <Link
                   href={`/jogar/moedas?opponentId=${item.id}&opponent=${encodeURIComponent(item.nickname)}`}
-                  className={`${gajrajOne.className} text-xs px-4 py-2 rounded-lg text-black bg-[#FFD700] hover:bg-yellow-400 transition-all`}
+                  className={`${gajrajOne.className} shrink-0 text-xs px-4 py-2 rounded-lg text-black bg-[#FFD700] hover:bg-yellow-400 transition-all`}
                 >
                   Desafiar
                 </Link>

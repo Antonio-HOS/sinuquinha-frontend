@@ -1,4 +1,3 @@
-
 import { gajrajOne } from "@/src/fonts";
 import Avatar from "@/src/components/Avatar";
 import type { User, UserStats } from "@/src/lib/api";

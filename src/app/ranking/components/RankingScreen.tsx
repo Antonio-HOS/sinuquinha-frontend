@@ -163,7 +163,10 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
             <span className={`${gajrajOne.className} text-center text-xl text-[#FFD700]`}>
               {player.position ?? index + 1}
             </span>
-            <div className="flex min-w-0 items-center gap-3">
+            <Link
+              href={`/profile/${player.user_id}`}
+              className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80"
+            >
               <Avatar
                 avatarId={player.avatar_id ? Number.parseInt(player.avatar_id, 10) : null}
                 className="size-9"
@@ -182,7 +185,7 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
                     : "Sem liga"}
                 </p>
               </div>
-            </div>
+            </Link>
             <RankPoints
               value={player.points}
               className={`${gajrajOne.className} flex items-center gap-1 text-sm text-[#FFD700]`}

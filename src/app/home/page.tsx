@@ -69,15 +69,16 @@ export default function HomePage() {
                 <span className="w-6 shrink-0 text-center text-sm font-bold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill]">
                   {player.position ?? index + 1}
                 </span>
-                <span
-                  className={`${gajrajOne.className}  flex min-w-0 flex-1 items-center gap-1.5 truncate text-xs text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:gap-2 sm:text-sm`}
+                <Link
+                  href={`/profile/${player.user_id}`}
+                  className={`${gajrajOne.className} flex min-w-0 flex-1 items-center gap-1.5 truncate text-xs text-white transition-opacity hover:opacity-80 [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:gap-2 sm:text-sm`}
                 >
                   <Avatar
                     avatarId={player.avatar_id ? Number.parseInt(player.avatar_id, 10) : null}
                     className="size-6 border border-black/25 sm:size-7"
                   />
                   <span className="truncate">{player.nickname}</span>
-                </span>
+                </Link>
                 <RankPoints
                   value={player.points}
                   className="shrink-0 text-xs font-semibold text-white [-webkit-text-stroke:1px_#000] [paint-order:stroke_fill] sm:text-sm"
