@@ -159,7 +159,7 @@ function MatchEndContent() {
           </section>
 
           <section className="mt-4 flex w-full justify-center rounded-xl border border-[#FFD700]/30 bg-black/15 p-4">
-            <RewardBadge value={reward} />
+            <RewardBadge value={reward} avatarId={winnerAvatarId} />
           </section>
 
           <section className="mt-4 flex w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-3">

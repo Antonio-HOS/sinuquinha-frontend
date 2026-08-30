@@ -153,6 +153,8 @@ function ActiveMatchContent() {
     }));
   }, [match?.mode, match?.players, userById]);
 
+  const isThreePlayerMatch = scoreEntries.length === 3;
+
   const handleConfirm = async () => {
     if (!matchId) return;
     try {
@@ -201,40 +203,96 @@ function ActiveMatchContent() {
           className="px-0 text-center"
         />
 
-        <section className={`mt-5 grid gap-3 px-1 ${scoreEntries.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
-          {scoreEntries.map((entry) => (
-            <div key={entry.id} className="flex flex-col gap-2">
-              <MatchPlayerCard
-                name={entry.name}
-                score={entry.score}
-                status={entry.status}
-                avatarId={userById.get(entry.targetUserId)?.avatar_id ? Number.parseInt(userById.get(entry.targetUserId)?.avatar_id ?? "", 10) : null}
-              />
-              <p className="min-h-8 text-center text-[10px] text-white/70">
-                {entry.description}
-              </p>
-              {match?.status === "active" ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleScoreUpdate(entry.targetUserId, -1)}
-                    disabled={!entry.targetUserId}
-                    className="rounded border border-red-300 py-1 text-sm text-red-200"
-                  >
-                    -1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleScoreUpdate(entry.targetUserId, 1)}
-                    disabled={!entry.targetUserId}
-                    className="rounded border border-[#2AC054] py-1 text-sm text-[#2AC054]"
-                  >
-                    +1
-                  </button>
+        <section
+          className={`mt-5 px-1 ${
+            isThreePlayerMatch ? "flex flex-col gap-3" : "grid grid-cols-2 gap-3"
+          }`}
+        >
+          {scoreEntries.map((entry) =>
+            isThreePlayerMatch ? (
+              <div key={entry.id} className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <MatchPlayerCard
+                    layout="horizontal"
+                    name={entry.name}
+                    score={entry.score}
+                    status={
+                      match?.status === "waiting_confirmation" ? entry.status : undefined
+                    }
+                    avatarId={
+                      userById.get(entry.targetUserId)?.avatar_id
+                        ? Number.parseInt(
+                            userById.get(entry.targetUserId)?.avatar_id ?? "",
+                            10,
+                          )
+                        : null
+                    }
+                  />
                 </div>
-              ) : null}
-            </div>
-          ))}
+                {match?.status === "active" ? (
+                  <div className="flex shrink-0 flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleScoreUpdate(entry.targetUserId, 1)}
+                      disabled={!entry.targetUserId}
+                      className="rounded border border-[#2AC054] px-4 py-2 text-sm text-[#2AC054]"
+                    >
+                      +1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleScoreUpdate(entry.targetUserId, -1)}
+                      disabled={!entry.targetUserId}
+                      className="rounded border border-red-300 px-4 py-2 text-sm text-red-200"
+                    >
+                      -1
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div key={entry.id} className="flex flex-col gap-2">
+                <MatchPlayerCard
+                  name={entry.name}
+                  score={entry.score}
+                  status={
+                    match?.status === "waiting_confirmation" ? entry.status : undefined
+                  }
+                  avatarId={
+                    userById.get(entry.targetUserId)?.avatar_id
+                      ? Number.parseInt(
+                          userById.get(entry.targetUserId)?.avatar_id ?? "",
+                          10,
+                        )
+                      : null
+                  }
+                />
+                <p className="min-h-8 text-center text-[10px] text-white/70">
+                  {entry.description}
+                </p>
+                {match?.status === "active" ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleScoreUpdate(entry.targetUserId, -1)}
+                      disabled={!entry.targetUserId}
+                      className="rounded border border-red-300 py-1 text-sm text-red-200"
+                    >
+                      -1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleScoreUpdate(entry.targetUserId, 1)}
+                      disabled={!entry.targetUserId}
+                      className="rounded border border-[#2AC054] py-1 text-sm text-[#2AC054]"
+                    >
+                      +1
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ),
+          )}
         </section>
 
         <section className="mt-5 flex items-center justify-between gap-4 rounded-md border border-white/15 bg-white/10 px-3 py-3">

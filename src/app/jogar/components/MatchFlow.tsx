@@ -154,21 +154,40 @@ type MatchPlayerCardProps = {
   score?: number;
   status?: string;
   avatarId?: number | null;
+  layout?: "vertical" | "horizontal";
 };
 
 export function MatchPlayerCard({
   name,
   score = 0,
-  status = "Confirmado",
+  status,
   avatarId,
+  layout = "vertical",
 }: MatchPlayerCardProps) {
+  if (layout === "horizontal") {
+    return (
+      <article className="flex w-full items-center gap-3 rounded border border-[#FFD700]/70 bg-white/10 p-3">
+        <Avatar avatarId={avatarId} className="size-16 shrink-0 border-2 border-[#FFEDAD]/70" />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <h2 className={`${gajrajOne.className} truncate text-xs tracking-[0.08em] text-[#FFD700]`}>
+            {name}
+          </h2>
+          {status ? <MatchStatus status={status} /> : null}
+        </div>
+        <strong className={`${gajrajOne.className} shrink-0 text-3xl text-white`}>
+          {score}
+        </strong>
+      </article>
+    );
+  }
+
   return (
     <article className="flex min-h-[158px] flex-col items-center justify-center rounded border border-[#FFD700]/70 bg-white/10 p-3 text-center">
       <Avatar avatarId={avatarId} className="size-16 border-2 border-[#FFEDAD]/70" />
       <h2 className={`${gajrajOne.className} mt-3 text-lg tracking-[0.08em] text-[#FFD700]`}>
         {name}
       </h2>
-      <MatchStatus status={status} />
+      {status ? <MatchStatus status={status} /> : null}
       <strong className={`${gajrajOne.className} mt-2 text-3xl text-white`}>
         {score}
       </strong>
@@ -218,18 +237,51 @@ export function BetCard({
 
 type RewardBadgeProps = {
   value: number;
+  avatarId?: number | null;
 };
 
-export function RewardBadge({ value }: RewardBadgeProps) {
+export function RewardBadge({ value, avatarId }: RewardBadgeProps) {
   return (
-    <div className="relative flex flex-col items-center">
-      <div className="relative flex size-24 items-center justify-center text-[#FFD700] drop-shadow-[0_8px_0_rgba(0,0,0,0.35)]">
-        <Trophy className="size-24 fill-[#FFD700] stroke-[#FFD700]" strokeWidth={1.6} />
-        <Avatar className="absolute top-8 size-10 border-2 border-[#FFD700]" />
+    <div className="relative flex flex-col items-center py-1">
+      <div className="relative">
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 size-32 -translate-x-1/2 -translate-y-[45%] rounded-full bg-[#FFD700]/20 blur-2xl"
+          aria-hidden
+        />
+        <span
+          className="absolute -left-1 top-4 size-1.5 rounded-full bg-[#FFEDAD] shadow-[0_0_8px_#FFD700]"
+          aria-hidden
+        />
+        <span
+          className="absolute -right-0.5 top-9 size-1 rounded-full bg-[#FFD700] shadow-[0_0_6px_#FFD700]"
+          aria-hidden
+        />
+        <span className="absolute right-3 top-2 size-1 rounded-full bg-white/70" aria-hidden />
+
+        <div className="relative flex size-[6.25rem] items-center justify-center">
+          <Trophy
+            className="size-[6.25rem] fill-[#FFD700] stroke-[#B8860B] drop-shadow-[0_8px_0_rgba(0,0,0,0.28),0_0_24px_rgba(255,215,0,0.4)]"
+            strokeWidth={1.3}
+          />
+          <div className="absolute left-1/2 top-[44%] z-10 -translate-x-1/2 -translate-y-1/2">
+            <div className="rounded-full bg-gradient-to-b from-[#FFEDAD] via-[#FFD700] to-[#C9A000] p-[2.5px] shadow-[0_3px_10px_rgba(0,0,0,0.35)]">
+              <Avatar
+                avatarId={avatarId}
+                className="size-11 border border-[#004C55]/20 bg-[#004C55]"
+              />
+            </div>
+          </div>
+        </div>
       </div>
-      <strong className={`${gajrajOne.className} mt-1 text-[2.35rem] leading-none text-[#FFD700]`}>
-        {value}
-      </strong>
+
+      <div className="mt-2.5 flex items-center gap-2 rounded-full border border-[#FFD700]/25 bg-[#FFD700]/10 px-4 py-1.5 shadow-[inset_0_1px_0_rgba(255,237,173,0.2)]">
+        <Avatar className="size-5 shrink-0 ring-1 ring-[#FFD700]/40" />
+        <strong
+          className={`${gajrajOne.className} text-[2.35rem] leading-none tracking-[0.04em] text-[#FFD700] drop-shadow-[0_2px_0_rgba(0,0,0,0.35)]`}
+        >
+          {value}
+        </strong>
+      </div>
     </div>
   );
 }
