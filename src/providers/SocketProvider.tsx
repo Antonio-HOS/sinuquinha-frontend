@@ -1,6 +1,6 @@
 "use client";
 
-import { API_URL, getAccessToken, type Match } from "@/src/lib/api";
+import { API_URL, api, getAccessToken, type Match } from "@/src/lib/api";
 import { useRouter } from "next/navigation";
 import {
   createContext,
@@ -16,9 +16,18 @@ import { io, type Socket } from "socket.io-client";
 type SocketContextValue = {
   socket: Socket | null;
   activeInvite: Match | null;
+  activeMatch: Match | null;
   acceptInvite: (matchId?: string) => void;
   declineInvite: (matchId?: string) => void;
 };
+
+function isActiveMatch(match: Match) {
+  return match.status === "active";
+}
+
+function pickActiveMatch(matches: Match[]) {
+  return matches.find(isActiveMatch) ?? null;
+}
 
 const SocketContext = createContext<SocketContextValue | null>(null);
 
@@ -35,6 +44,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [activeInvite, setActiveInvite] = useState<Match | null>(null);
+  const [activeMatch, setActiveMatch] = useState<Match | null>(null);
 
   useEffect(() => {
     const connect = () => {
@@ -45,8 +55,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
           current?.disconnect();
           return null;
         });
+        setActiveMatch(null);
         return;
       }
+
+      void api.matches("active").then(pickActiveMatch).then(setActiveMatch).catch(() => {
+        setActiveMatch(null);
+      });
 
       const nextSocket = io(API_URL, {
         auth: { token },
@@ -66,8 +81,23 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         setActiveInvite(match);
       });
 
+      const clearActiveMatch = (match: Match) => {
+        setActiveMatch((current) => (current?.id === match.id ? null : current));
+      };
+
+      const syncActiveMatch = (match: Match) => {
+        setActiveMatch((current) => {
+          if (match.id !== current?.id && !isActiveMatch(match)) {
+            return current;
+          }
+
+          return isActiveMatch(match) ? match : null;
+        });
+      };
+
       nextSocket.on("match:started", (match: Match) => {
         setActiveInvite(null);
+        setActiveMatch(match);
         router.push(`/jogar/partida?matchId=${match.id}`);
       });
 
@@ -75,14 +105,22 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         if (match.status !== "waiting_confirmation") {
           setActiveInvite((current) => (current?.id === match.id ? null : current));
         }
+        syncActiveMatch(match);
       });
+
+      nextSocket.on("match:state", syncActiveMatch);
+      nextSocket.on("match:score:updated", syncActiveMatch);
+      nextSocket.on("match:concluded", clearActiveMatch);
+      nextSocket.on("match:finished", clearActiveMatch);
 
       nextSocket.on("match:declined", (match: Match) => {
         setActiveInvite((current) => (current?.id === match.id ? null : current));
+        clearActiveMatch(match);
       });
 
       nextSocket.on("match:cancelled", (match: Match) => {
         setActiveInvite((current) => (current?.id === match.id ? null : current));
+        clearActiveMatch(match);
       });
 
       setSocket(nextSocket);
@@ -125,8 +163,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ socket, activeInvite, acceptInvite, declineInvite }),
-    [acceptInvite, activeInvite, declineInvite, socket],
+    () => ({ socket, activeInvite, activeMatch, acceptInvite, declineInvite }),
+    [acceptInvite, activeInvite, activeMatch, declineInvite, socket],
   );
 
   return (

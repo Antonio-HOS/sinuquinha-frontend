@@ -1,5 +1,6 @@
 "use client";
 
+import ActiveMatchBanner from "@/src/components/ActiveMatchBanner";
 import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 
@@ -31,6 +32,7 @@ export default function BackgroundShell({ children }: BackgroundShellProps) {
           style={{ backgroundImage }}
         />
         <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
+          <ActiveMatchBanner />
           {children}
         </div>
       </div>

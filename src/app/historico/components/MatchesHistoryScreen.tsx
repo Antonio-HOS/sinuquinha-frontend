@@ -23,7 +23,9 @@ export default function MatchesHistoryScreen() {
         ]);
 
         setMatches(
-          matchesResponse.status === "fulfilled" ? matchesResponse.value : [],
+          matchesResponse.status === "fulfilled"
+            ? matchesResponse.value.filter((match) => match.status !== "cancelled")
+            : [],
         );
         setUsers(usersResponse.status === "fulfilled" ? usersResponse.value : []);
       } finally {
