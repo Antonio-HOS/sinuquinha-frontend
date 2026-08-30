@@ -3,6 +3,18 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  async rewrites() {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
+      "http://localhost:8000";
+
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: `${apiUrl}/uploads/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -207,7 +207,11 @@ export function getWinnerCoinPayout(match: Match, userId?: string) {
 
 export function getMatchPhotoUrl(match?: Pick<Match, "file"> | null) {
   if (match?.file) {
-    return match.file.startsWith("http") ? match.file : `${API_URL}${match.file}`;
+    if (match.file.startsWith("http")) {
+      return match.file;
+    }
+
+    return match.file.startsWith("/") ? match.file : `/${match.file}`;
   }
 
   return DEFAULT_MATCH_PHOTO;
