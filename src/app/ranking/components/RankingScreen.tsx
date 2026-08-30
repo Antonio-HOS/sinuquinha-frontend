@@ -39,6 +39,8 @@ const leagueIcons: Record<League, React.ElementType> = {
 
 const leagueOrder: League[] = ["geral", "diamante", "ouro", "prata", "bronze"];
 
+const LEAGUE_DRAG_THRESHOLD = 8;
+
 const leagueRanges: Record<RankedLeague, { min: number; max?: number }> = {
   bronze: { min: 400, max: 499 },
   prata: { min: 500, max: 599 },
@@ -76,6 +78,14 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
     void loadRanking();
   }, []);
 
+  useEffect(() => {
+    const nav = leagueNavRef.current;
+    if (!nav) return;
+
+    const activeLink = nav.querySelector<HTMLElement>('[data-league-active="true"]');
+    activeLink?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [league]);
+
   const visiblePlayers =
     league === "geral"
       ? players
@@ -97,7 +107,6 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
       scrollLeft: nav.scrollLeft,
       hasDragged: false,
     };
-    nav.setPointerCapture(event.pointerId);
   };
 
   const handleLeaguePointerMove = (event: PointerEvent<HTMLElement>) => {
@@ -105,11 +114,15 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
     const drag = leagueDragRef.current;
     if (!nav || !drag.isDragging) return;
 
-    event.preventDefault();
     const walk = event.clientX - drag.startX;
-    if (Math.abs(walk) > 5) {
+    if (!drag.hasDragged && Math.abs(walk) <= LEAGUE_DRAG_THRESHOLD) return;
+
+    if (!drag.hasDragged) {
       drag.hasDragged = true;
+      nav.setPointerCapture(event.pointerId);
     }
+
+    event.preventDefault();
     nav.scrollLeft = drag.scrollLeft - walk;
   };
 
@@ -123,12 +136,11 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
     }
   };
 
-  const handleLeagueNavClick = (event: MouseEvent<HTMLElement>) => {
+  const handleLeagueLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (leagueDragRef.current.hasDragged) {
       event.preventDefault();
-      event.stopPropagation();
-      leagueDragRef.current.hasDragged = false;
     }
+    leagueDragRef.current.hasDragged = false;
   };
 
   return (
@@ -147,13 +159,12 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
       <div className="-mx-4 mt-5">
         <nav
           ref={leagueNavRef}
-          className="scrollbar-hidden flex cursor-grab gap-2 overflow-x-auto pb-1 select-none active:cursor-grabbing"
+          className="scrollbar-hidden flex cursor-grab gap-2 overflow-x-auto px-4 pb-1 select-none active:cursor-grabbing"
           style={{ touchAction: "pan-x" }}
           onPointerDown={handleLeaguePointerDown}
           onPointerMove={handleLeaguePointerMove}
           onPointerUp={endLeagueDrag}
           onPointerCancel={endLeagueDrag}
-          onClickCapture={handleLeagueNavClick}
         >
           {leagueOrder.map((item) => {
             const Icon = leagueIcons[item];
@@ -164,6 +175,8 @@ export default function RankingScreen({ league = "geral" }: RankingScreenProps) 
                 key={item}
                 href={item === "geral" ? "/ranking" : `/ranking/${item}`}
                 draggable={false}
+                data-league-active={isActive ? "true" : undefined}
+                onClick={handleLeagueLinkClick}
                 className={`${gajrajOne.className} flex min-w-[72px] shrink-0 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-center text-[9px] leading-none transition-colors ${
                   isActive
                     ? `${leagueStyles[item]} bg-white/10 shadow-[0_0_16px_rgba(255,215,0,0.12)]`

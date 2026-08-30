@@ -53,7 +53,7 @@ function DailyCoinsModal({
 }: DailyCoinsModalProps) {
   return (
     <main
-      className="flex min-h-full flex-1 cursor-pointer items-center justify-center bg-[#1f1f1f] px-5 py-10"
+      className="flex min-h-full flex-1 cursor-pointer items-center justify-center bg-[#1f1f1fa9] px-5 py-10"
       onClick={onClose}
       aria-label="Fechar modal de moedas diárias"
     >
@@ -76,8 +76,8 @@ function DailyCoinsModal({
         ) : null}
 
         <div
-          className={`absolute left-1/2 z-20 -translate-x-1/2 ${
-            canCollect ? "top-6 h-[104px] w-[212px]" : "top-0 h-[106px] w-[126px]"
+          className={`absolute left-1/2 z-20 flex -translate-x-1/2 items-end overflow-visible ${
+            canCollect ? "top-6 w-[212px] justify-between" : "top-0 w-[132px] justify-center"
           }`}
           aria-hidden
         >
@@ -88,7 +88,7 @@ function DailyCoinsModal({
               width={158}
               height={126}
               priority
-              className="absolute bottom-0 left-0 z-20 h-auto w-[132px]"
+              className="animate-flutuar h-auto w-[132px] shrink-0"
             />
           ) : null}
           <Image
@@ -97,9 +97,7 @@ function DailyCoinsModal({
             width={154}
             height={130}
             priority
-            className={`absolute bottom-0 z-10 h-auto ${
-              canCollect ? "right-0 w-[126px]" : "left-1/2 w-[126px] -translate-x-1/2"
-            }`}
+            className="animate-flutuar h-auto w-[132px] shrink-0"
           />
         </div>
 
