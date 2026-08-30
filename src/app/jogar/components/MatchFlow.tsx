@@ -186,7 +186,7 @@ type BetCardProps = {
 export function BetCard({
   value,
   opponent = "codigo",
-  gameType = "Bola 8",
+  gameType = "Ímpar ou Par",
   compact = false,
 }: BetCardProps) {
   return (

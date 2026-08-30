@@ -133,11 +133,11 @@ function MatchEndContent() {
   }, [photoPreview]);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-5">
+    <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-3 sm:px-5">
       <AppHeader />
 
-      <main className="relative flex min-h-0 flex-1 flex-col items-center text-center">
-        <div className="scrollbar-hidden mx-auto flex min-h-0 w-full max-w-[344px] flex-1 flex-col items-center overflow-y-scroll px-2">
+      <main className="scrollbar-hidden relative flex min-h-0 flex-1 flex-col items-center overflow-y-auto text-center">
+        <div className="mx-auto w-full max-w-[344px] px-2 pb-4">
           <section className="w-full rounded-xl border border-white/15 bg-white/10 p-4">
 
             <div className="mt-5 text-center">
